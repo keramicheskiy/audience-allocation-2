@@ -1,0 +1,129 @@
+services:
+  backend:
+    container_name: backend
+    build: ./backend
+    ports:
+      - "8000:8000"
+    networks:
+      - nginx_network
+    environment:
+      - MODE=local
+    depends_on:
+      #      - db
+      - redis
+    volumes:
+      - ./config.yaml:/config.yaml
+    command: >
+      python manage.py makemigrations &
+      python manage.py migrate &
+      bash -c "celery -A backend worker --loglevel=info &
+      gunicorn backend.wsgi:application --bind 0.0.0.0:8080 --timeout 120"
+
+
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    volumes:
+      - static-data:/frontend/static
+      - ./config.yaml:/config.yaml
+    networks:
+      - nginx_network
+    environment:
+      - MODE=local
+    depends_on:
+      - backend
+    entrypoint: /entrypoint.sh
+    command: >
+      bash -c "gunicorn frontend.wsgi:application --bind 0.0.0.0:8000 --timeout 120"
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    networks:
+      - nginx_network
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+
+  tg-bot:
+    container_name: tg-bot
+    build: ./tg-bot
+    environment:
+      - MODE=local
+    volumes:
+      - ./config.yaml:/config.yaml
+    depends_on:
+      - backend
+
+#  db:
+#    container_name: db
+#    image: postgres
+#    restart: always
+#    volumes:
+#      - db-data:/var/lib/postgresql/data
+#    environment:
+#      - NAME = postgres
+#      - PASSWORD = postgres
+#      - HOST = db
+#    expose:
+#      - 5432
+#    healthcheck:
+#      test: [ "CMD", "pg_isready" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+
+volumes:
+  static-data:
+    external: true
+
+networks:
+  nginx_network:
+    external: true
+
+
+
+
+
+
+
+
+# The commented out section below is an example of how to define a PostgreSQL
+# database that your application can use. `depends_on` tells Docker Compose to
+# start the database before your application. The `db-data` volume persists the
+# database data between container restarts. The `db-password` secret is used
+# to set the database password. You must create `db/password.txt` and add
+# a password of your choosing to it before running `docker compose up`.
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#   db:
+#     image: postgres
+#     restart: always
+#     user: postgres
+#     secrets:
+#       - db-password
+#     volumes:
+#       - db-data:/var/lib/postgresql/data
+#     environment:
+#       - POSTGRES_DB=example
+#       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+#     expose:
+#       - 5432
+#     healthcheck:
+#       test: [ "CMD", "pg_isready" ]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+# volumes:
+#   db-data:
+# secrets:
+#   db-password:
+#     file: db/password.txt
+

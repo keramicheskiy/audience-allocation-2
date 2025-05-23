@@ -18,3 +18,4 @@ BACKEND_URL = env["backend"].get("BACKEND_URL")
 
 conn = sqlite3.connect('db.sqlite', check_same_thread=False)
 cursor = conn.cursor()
+

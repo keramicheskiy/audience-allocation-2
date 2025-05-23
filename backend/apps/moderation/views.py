@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from apps.authentication.decorators import role_required
 from apps.authentication.models import CustomUser
 from apps.moderation.models import Auditorium, Equipment
-from apps.moderation.serializers import AuditoriumSerializer, EquipmentSerializer, SubjectSerializer
+from apps.moderation.serializers import AuditoriumSerializer, EquipmentSerializer
 from apps.teachers.models import Lecture
 from apps.teachers.serializers import LectureSerializer
 

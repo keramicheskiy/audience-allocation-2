@@ -8,9 +8,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from apps.authentication.decorators import role_required
-from apps.authentication.models import CustomUser
-from apps.moderation.models import Auditorium, Equipment, Subject
-from apps.moderation.serializers import AuditoriumSerializer, EquipmentSerializer, SubjectSerializer
+from apps.moderation.models import Auditorium, Equipment
+from apps.moderation.serializers import AuditoriumSerializer, EquipmentSerializer
 from apps.teachers.models import Lecture
 from apps.teachers.serializers import LectureSerializer
 from apps.teachers.services import get_lecture_intervals
@@ -34,20 +33,6 @@ def get_equipment(request, key):
     return Response({"equipment": serializer.data}, status=status.HTTP_200_OK)
 
 
-@api_view(["GET"])
-@role_required("teacher")
-def get_subjects(request):
-    serializer = SubjectSerializer(Subject.objects.all(), many=True)
-    return Response({"subjects": serializer.data}, status=status.HTTP_200_OK)
-
-
-@api_view(["GET"])
-@role_required("teacher")
-def get_subject(request, key):
-    serializer = SubjectSerializer(Subject.objects.get(id=key))
-    return Response({"subject": serializer.data}, status=status.HTTP_200_OK)
-
-
 @api_view(['GET'])
 @role_required('teacher')
 def lectures_from_teacher(request):
@@ -65,7 +50,7 @@ def get_not_yet_passed_lectures(request):
     lectures = Lecture.objects.filter(email=user.email).order_by('date', 'start')
     not_yet_passed = []
     for lecture in lectures:
-        lecture_end = lecture.get_end_datetime()
+        lecture_end = lecture.end
         if lecture_end > now:
             not_yet_passed.append(lecture)
     return Response({'lectures': LectureSerializer(not_yet_passed, many=True).data})
@@ -99,6 +84,7 @@ def book_auditorium(request, auditorium_id):
         Lecture(auditorium=auditorium, date=start, end=end, user=user).save()
     else:
         return Response({'error': 'Auditorium is not available'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 # def TODO ПОЛУЧИТЬ РАЗРЕШЕННУЮ АУДИТОРИЮ
 

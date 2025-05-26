@@ -39,8 +39,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_verified = models.BooleanField(default=False)
 
     allowed_auditoriums = models.ManyToManyField(Auditorium, blank=True)
-    booking_limit = models.PositiveIntegerField(blank=True, null=True)
-    hours_limit = models.PositiveIntegerField(blank=True, null=True)
+    booking_limit = models.PositiveIntegerField(default=10, blank=True, null=True)
+    hours_limit = models.PositiveIntegerField(default=20, blank=True, null=True)
 
     is_staff = models.BooleanField(default=False)  # Для админки
     is_active = models.BooleanField(default=True)

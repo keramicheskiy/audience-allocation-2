@@ -71,10 +71,10 @@ def verify_token(request):
     return Response({"user": user}, status=status.HTTP_200_OK)
 
 
-# localhost:8080/auth/role/is-assigned
+# localhost:8080/auth/role/is-confirmed
 @api_view(['GET'])
 @role_required('teacher')
-def is_role_assigned(request):
+def is_role_confirmed(request):
     user = utils.get_user_from_request(request)
     if RoleForApproving.objects.find(user=user).exists():
         return Response(status=status.HTTP_403_FORBIDDEN)

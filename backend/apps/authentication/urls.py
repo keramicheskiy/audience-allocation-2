@@ -6,6 +6,6 @@ urlpatterns = [
     path('register', views.register),
     path('login', views.login),
     path('verify-token', views.verify_token),
-    path('role/is-assigned', views.is_role_assigned),
+    path('role/is-confirmed', views.is_role_confirmed),
 
 ]

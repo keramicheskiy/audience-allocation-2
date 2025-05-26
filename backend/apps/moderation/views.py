@@ -91,13 +91,13 @@ def lectures_from_teacher(request, user_id):
     return Response({'lectures': LectureSerializer(lectures, many=True).data})
 
 
-# localhost:8080/moderation/users/<user_id>/auditoriums
-# {"auditorium_id": ""}
-@api_view(["PATCH", "DELETE"])
+# localhost:8080/moderation/users/<user_id>/auditoriums/<auditorium_id>
+# {}
+@api_view(["POST", "DELETE"])
 @role_required("moderator")
-def manage_allowed_auditoriums(request, user_id):
-    if request.method == "PATCH":
-        auditorium = get_object_or_404(Auditorium, pk=request.data.get('auditorium_id'))
+def manage_allowed_auditorium(request, user_id, auditorium_id):
+    if request.method == "POST":
+        auditorium = get_object_or_404(Auditorium, pk=auditorium_id)
         user = get_object_or_404(CustomUser, pk=user_id)
         if auditorium not in user.allowed_auditoriums.all():
             user.allowed_auditoriums.add(auditorium)
@@ -105,29 +105,29 @@ def manage_allowed_auditoriums(request, user_id):
         return Response(status=status.HTTP_200_OK)
     elif request.method == "DELETE":
         user = get_object_or_404(CustomUser, pk=user_id)
-        user.allowed_auditoriums.clear()
+        auditorium = get_object_or_404(Auditorium, pk=auditorium_id)
+        user.allowed_auditoriums.remove(auditorium)
         user.save()
         return Response(status=status.HTTP_200_OK)
 
 
-# localhost:8080/moderation/users/<user_id>/auditoriums/<auditorium_id>
+# localhost:8080/moderation/users/<user_id>/auditoriums
 @api_view(["DELETE"])
 @role_required("moderator")
-def delete_allowed_auditorium(request, user_id, auditorium_id):
+def reset_allowed_auditoriums(request, user_id):
     user = get_object_or_404(CustomUser, pk=user_id)
-    auditorium = get_object_or_404(Auditorium, pk=auditorium_id)
-    user.allowed_auditoriums.remove(auditorium)
+    user.allowed_auditoriums.clear()
     user.save()
     return Response(status=status.HTTP_200_OK)
 
 
-# localhost:8080/moderation/users/<user_id>/hours/limit
-# {"amount": ""}
+# localhost:8080/moderation/users/<user_id>/limit/hours
+# {"amount": 1}
 @api_view(["PATCH"])
 @role_required("moderator")
 def limit_amount_of_hours(request):
     user = utils.get_user_from_request(request)
-    amount = int(request.data.get('amount'))
+    amount = request.data.get('amount')
     if amount >= 0:
         user.hours_limit = amount
         user.save()
@@ -135,13 +135,13 @@ def limit_amount_of_hours(request):
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-# localhost:8080/moderation/users/<user_id>/auditoriums/limit
-# {"amount": ""}
+# localhost:8080/moderation/users/<user_id>/limit/auditoriums
+# {"amount": 1}
 @api_view(["PATCH"])
 @role_required("moderator")
 def limit_amount_of_auditoriums(request):
     user = utils.get_user_from_request(request)
-    amount = int(request.data.get('amount'))
+    amount = request.data.get('amount')
     if amount >= 0:
         user.booking_limit = amount
         user.save()

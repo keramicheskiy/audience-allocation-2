@@ -42,7 +42,7 @@ def get_all_users(request):
     return Response({"users": CustomUserSerializer(users, many=True).data})
 
 
-# localhost:8080/administration/users/<user_id>/role/approve
+# localhost:8080/administration/users/<user_id>/role
 # {"role": ""}
 @api_view(['PATCH'])
 @role_required("admin")
@@ -55,7 +55,7 @@ def change_role(request, user_id):
     return Response({"role": new_role}, status=status.HTTP_200_OK)
 
 
-# localhost:8080/administration/users/{user_id}
+# localhost:8080/administration/users/<user_id>
 @api_view(["DELETE"])
 @role_required("admin")
 def delete_user(request, user_id):

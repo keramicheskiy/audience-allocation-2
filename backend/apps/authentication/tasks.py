@@ -9,7 +9,6 @@ from celery import shared_task
 from backend.settings import sender_email, email_password, smtp_server, smtp_port
 
 
-
 @shared_task
 def send_mail(receiver_email, subject, text):
     message = MIMEMultipart()

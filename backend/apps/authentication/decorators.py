@@ -25,7 +25,7 @@ def role_required(role):
                 user = Token.objects.get(token=token).user
                 if user.role in permitted_roles(role):
                     return view_func(request, *args, **kwargs)
-                return HttpResponseForbidden("Ваша роль не подходит для данного действия или еще не была подтверждена.")
+                return Response(status=status.HTTP_403_FORBIDDEN)
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         return _wrapped_view

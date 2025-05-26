@@ -1,8 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from apps.authentication import utils
 from apps.authentication.decorators import role_required
 from apps.authentication.models import CustomUser
 from apps.moderation.models import Auditorium, Equipment
@@ -11,10 +13,7 @@ from apps.teachers.models import Lecture
 from apps.teachers.serializers import LectureSerializer
 
 
-# Create your views here.
-# Auditorium, Equipment, Subject
-
-
+# localhost:8080/moderation/lectures
 @api_view(['GET'])
 @role_required('moderator')
 def get_lectures(request):
@@ -22,6 +21,8 @@ def get_lectures(request):
     return Response({'lectures': LectureSerializer(lectures, many=True).data})
 
 
+# localhost:8080/moderation/auditoriums/new
+# {"number": "", "size": 1, "equipment": 1, "location": "", "description": ""}
 @api_view(["POST"])
 @role_required("moderator")
 def create_auditorium(request):
@@ -32,25 +33,27 @@ def create_auditorium(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["PUT"])
+# localhost:8080/moderation/auditoriums/<auditorium_id>
+# {"number": "", "size": 1, "equipment": 1, "location": "", "description": ""}
+@api_view(["PATCH", "DELETE"])
 @role_required("moderator")
-def update_auditorium(request, key):
-    auditorium = get_object_or_404(Auditorium, pk=key)
-    serializer = AuditoriumSerializer(auditorium, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+def manage_auditorium(request, auditorium_id):
+    if request.method == "PATCH":
+        auditorium = get_object_or_404(Auditorium, pk=auditorium_id)
+        serializer = AuditoriumSerializer(auditorium, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == "DELETE":
+        auditorium = get_object_or_404(Auditorium, pk=auditorium_id)
+        auditorium.delete()
+        return Response(status=status.HTTP_200_OK)
 
 
-@api_view(["DELETE"])
-@role_required("moderator")
-def delete_auditorium(request, key):
-    auditorium = get_object_or_404(Auditorium, pk=key)
-    auditorium.delete()
-    return Response(status=status.HTTP_200_OK)
-
-
+# localhost:8080/moderation/equipments/new
+# {"name": ""}
 @api_view(["POST"])
 @role_required("moderator")
 def create_equipment(request):
@@ -61,25 +64,86 @@ def create_equipment(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["PUT"])
+# localhost:8080/moderation/equipments/<equipment_id>
+# {"name": ""}
+@api_view(["PATCH", "DELETE"])
 @role_required("moderator")
-def update_equipment(request, key):
-    equipment = get_object_or_404(Equipment, pk=key)
-    serializer = EquipmentSerializer(equipment, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+def manage_equipment(request, equipment_id):
+    if request.method == "PATCH":
+        equipment = get_object_or_404(Equipment, pk=equipment_id)
+        serializer = EquipmentSerializer(equipment, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == "DELETE":
+        equipment = get_object_or_404(Equipment, pk=equipment_id)
+        equipment.delete()
+        return Response(status=status.HTTP_200_OK)
 
 
+# localhost:8080/moderation/users/<user_id>/lectures
+@api_view(["GET"])
+@role_required('moderator')
+def lectures_from_teacher(request, user_id):
+    user = get_object_or_404(CustomUser, pk=user_id)
+    lectures = Lecture.objects.filter(user=user).order_by('date', 'start')
+    return Response({'lectures': LectureSerializer(lectures, many=True).data})
+
+
+# localhost:8080/moderation/users/<user_id>/auditoriums
+# {"auditorium_id": ""}
+@api_view(["PATCH", "DELETE"])
+@role_required("moderator")
+def manage_allowed_auditoriums(request, user_id):
+    if request.method == "PATCH":
+        auditorium = get_object_or_404(Auditorium, pk=request.data.get('auditorium_id'))
+        user = get_object_or_404(CustomUser, pk=user_id)
+        if auditorium not in user.allowed_auditoriums.all():
+            user.allowed_auditoriums.add(auditorium)
+            user.save()
+        return Response(status=status.HTTP_200_OK)
+    elif request.method == "DELETE":
+        user = get_object_or_404(CustomUser, pk=user_id)
+        user.allowed_auditoriums.clear()
+        user.save()
+        return Response(status=status.HTTP_200_OK)
+
+
+# localhost:8080/moderation/users/<user_id>/auditoriums/<auditorium_id>
 @api_view(["DELETE"])
 @role_required("moderator")
-def delete_equipment(request, key):
-    equipment = get_object_or_404(Equipment, pk=key)
-    equipment.delete()
+def delete_allowed_auditorium(request, user_id, auditorium_id):
+    user = get_object_or_404(CustomUser, pk=user_id)
+    auditorium = get_object_or_404(Auditorium, pk=auditorium_id)
+    user.allowed_auditoriums.remove(auditorium)
+    user.save()
     return Response(status=status.HTTP_200_OK)
 
-# def TODO ОГРАНИЧИТЬ АУДИТОРИИ ДЛЯ ПРЕПОДА
-# def TODO ОГРАНИЧИТЬ МАКСИМАЛЬНОЕ КОЛИЧЕСТВО ЧАСОВ БРОНИ ДЛЯ ПРЕПОДА
-# def TODO ОГРАНИЧИТЬ КОЛИЧЕСТВО АУДИТОРИЙ ДЛЯ ПРЕПОДА
-# def TODO ПОЛУЧИТЬ ВСЕ ПРЕДСТОЯЩИЕ И НЕПРОШДШИЕ ЗАНЯТИЯ (ПРЕПОДУ ТОЖЕ НУЖНА ЭТА ФУНКЦИЯ)
+
+# localhost:8080/moderation/users/<user_id>/hours/limit
+# {"amount": ""}
+@api_view(["PATCH"])
+@role_required("moderator")
+def limit_amount_of_hours(request):
+    user = utils.get_user_from_request(request)
+    amount = int(request.data.get('amount'))
+    if amount >= 0:
+        user.hours_limit = amount
+        user.save()
+        return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+# localhost:8080/moderation/users/<user_id>/auditoriums/limit
+# {"amount": ""}
+@api_view(["PATCH"])
+@role_required("moderator")
+def limit_amount_of_auditoriums(request):
+    user = utils.get_user_from_request(request)
+    amount = int(request.data.get('amount'))
+    if amount >= 0:
+        user.booking_limit = amount
+        user.save()
+        return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)

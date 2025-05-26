@@ -7,13 +7,18 @@ urlpatterns = [
     path("lectures", views.get_lectures),
 
     # Auditoriums
-    path("auditoriums/create", views.create_auditorium),
-    path("auditoriums/<int:pk>/update", views.update_auditorium),
-    path("auditoriums/<int:pk>/delete", views.delete_auditorium),
+    path("auditoriums/new", views.create_auditorium),
+    path("auditoriums/<auditorium_id>", views.manage_auditorium),
 
     # Equipment
-    path("equipments/create", views.create_equipment),
-    path("equipments/<int:pk>/update", views.update_equipment),
-    path("equipments/<int:pk>/delete", views.delete_equipment),
+    path("equipments/new", views.create_equipment),
+    path("equipments/<equipment_id>", views.manage_equipment),
+
+    # Users
+    path("users/<user_id>/lectures", views.lectures_from_teacher),
+    path("users/<user_id>/auditoriums", views.manage_allowed_auditoriums),
+    path("users/<user_id>/auditoriums/<auditorium_id>", views.delete_allowed_auditorium),
+    path("users/<user_id>/hours/limit", views.limit_amount_of_hours),
+    path("users/<user_id>/auditoriums/limit", views.limit_amount_of_auditoriums),
 
 ]

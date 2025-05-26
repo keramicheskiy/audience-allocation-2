@@ -5,7 +5,6 @@ import pytz
 import yaml
 from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 MODE = os.environ.get('MODE', 'local')
@@ -20,8 +19,6 @@ SECRET_KEY = env["django"].get('SECRET_KEY')
 
 DEBUG = bool(int(env["django"].get('DEBUG')))
 ALLOWED_HOSTS = env["django"].get("ALLOWED_HOSTS").split(" ")
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -74,11 +71,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-
-
 DB_ENGINE = db.get('ENGINE')
 
 if DB_ENGINE == 'django.db.backends.sqlite3':
@@ -95,13 +87,10 @@ else:
             'NAME': db.get('NAME', 'postgres'),
             'USER': db.get('USER', 'postgres'),
             'PASSWORD': db.get('PASSWORD', 'postgres'),
-            'HOST': db.get('HOST', 'localhost'),  # TODO Имя контейнера для базы данных в Docker Compose не забудь
+            'HOST': db.get('HOST', 'localhost'),  # название контейнера для базы данных в docker-compose
             'PORT': db.get('PORT', '5432'),
         }
     }
-
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -118,9 +107,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -129,7 +115,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-tz = pytz.timezone("Europe/Moscow")
+time_zone = pytz.timezone(env["django"].get('TIME_ZONE', "Europe/Moscow"))
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -163,6 +149,6 @@ ROLES_CHOICES = (
 
 ROLES = ["teacher", "moderator", "admin"]
 
+
 def permitted_roles(role):
     return ROLES[ROLES.index(role):]
-

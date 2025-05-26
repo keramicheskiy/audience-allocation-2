@@ -9,6 +9,7 @@ from apps.authentication.models import CustomUser
 from apps.authentication.serializers import CustomUserSerializer
 
 
+# localhost:8080/administration/requests
 @api_view(['GET'])
 @role_required("admin")
 def role_approving_requests(request):
@@ -16,6 +17,8 @@ def role_approving_requests(request):
     return Response({'requests': RoleForApprovingSerializer(approving_requests, many=True).data})
 
 
+# localhost:8080/administration/requests/<request_id>
+# {}
 @api_view(['PATCH', 'DELETE'])
 @role_required("admin")
 def role_approvance(request, request_id):
@@ -31,6 +34,7 @@ def role_approvance(request, request_id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# localhost:8080/administration/users
 @api_view(['GET'])
 @role_required("admin")
 def get_all_users(request):
@@ -38,6 +42,8 @@ def get_all_users(request):
     return Response({"users": CustomUserSerializer(users, many=True).data})
 
 
+# localhost:8080/administration/users/<user_id>/role/approve
+# {"role": ""}
 @api_view(['PATCH'])
 @role_required("admin")
 def change_role(request, user_id):
@@ -49,13 +55,10 @@ def change_role(request, user_id):
     return Response({"role": new_role}, status=status.HTTP_200_OK)
 
 
-@api_view(["GET", "DELETE"])
+# localhost:8080/administration/users/{user_id}
+@api_view(["DELETE"])
 @role_required("admin")
-def manage_user(request, user_id):
-    if request.method == "GET":
-        user = get_object_or_404(CustomUser, pk=user_id)
-        return Response({"user": CustomUserSerializer(user).data}, status=status.HTTP_200_OK)
-    elif request.method == "DELETE":
-        user = get_object_or_404(CustomUser, pk=user_id)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+def delete_user(request, user_id):
+    user = get_object_or_404(CustomUser, pk=user_id)
+    user.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)

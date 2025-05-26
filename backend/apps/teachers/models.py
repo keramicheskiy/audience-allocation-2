@@ -5,6 +5,7 @@ from django.db import models
 from apps.moderation.models import Auditorium
 from django.conf import settings
 
+
 class Lecture(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     auditorium = models.ForeignKey(Auditorium, on_delete=models.CASCADE, related_name='lectures')

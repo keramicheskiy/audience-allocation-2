@@ -9,8 +9,8 @@ services:
     environment:
       - MODE=local
     depends_on:
-      #      - audience-allocation-db
-      - audience-allocation-redis
+      #      - db
+      - redis
     volumes:
       - ./config.yaml:/config.yaml
     command: >
@@ -33,7 +33,7 @@ services:
     environment:
       - MODE=local
     depends_on:
-      - audience-allocation-backend
+      - backend
     entrypoint: /entrypoint.sh
     command: >
       bash -c "gunicorn frontend.wsgi:application --bind 0.0.0.0:8000 --timeout 120"
@@ -59,7 +59,7 @@ services:
     volumes:
       - ./config.yaml:/config.yaml
     depends_on:
-      - audience-allocation-backend
+      - backend
 
 #  db:
 #    container_name: audience-allocation-db

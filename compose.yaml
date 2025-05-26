@@ -1,6 +1,6 @@
 services:
   backend:
-    container_name: backend:audience-allocation
+    container_name: audience-allocation-backend
     build: ./backend
     ports:
       - "8080:8080"
@@ -9,8 +9,8 @@ services:
     environment:
       - MODE=local
     depends_on:
-      #      - db
-      - redis
+      #      - audience-allocation-db
+      - audience-allocation-redis
     volumes:
       - ./config.yaml:/config.yaml
     command: >
@@ -21,7 +21,7 @@ services:
 
 
   frontend:
-    container_name: frontend:audience-allocation
+    container_name: audience-allocation-frontend
     build: ./frontend
     ports:
       - "8000:8000"
@@ -33,13 +33,13 @@ services:
     environment:
       - MODE=local
     depends_on:
-      - backend
+      - audience-allocation-backend
     entrypoint: /entrypoint.sh
     command: >
       bash -c "gunicorn frontend.wsgi:application --bind 0.0.0.0:8000 --timeout 120"
 
   redis:
-    container_name: redis:audience-allocation
+    container_name: audience-allocation-redis
     image: redis:7-alpine
     networks:
       - nginx_network
@@ -52,17 +52,17 @@ services:
       retries: 3
 
   tg-bot:
-    container_name: tg-bot:audience-allocation
+    container_name: audience-allocation-tg-bot
     build: ./tg-bot
     environment:
       - MODE=local
     volumes:
       - ./config.yaml:/config.yaml
     depends_on:
-      - backend
+      - audience-allocation-backend
 
 #  db:
-#    container_name: db:audience-allocation
+#    container_name: audience-allocation-db
 #    image: postgres
 #    restart: always
 #    volumes:

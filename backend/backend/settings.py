@@ -32,10 +32,13 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'celery',
-    'apps.authentication',
-    'apps.teachers',
-    'apps.moderation',
-    'apps.administration',
+    'apps.auth',
+    'apps.auditoriums',
+    'apps.equipments',
+    'apps.lectures',
+    'apps.my',
+    'apps.role_approvance_requests',
+    'apps.users',
 
 ]
 

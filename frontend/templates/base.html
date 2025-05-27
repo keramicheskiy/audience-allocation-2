@@ -1,18 +1,38 @@
-{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Title{% endblock %}</title>
-    {% block meta %}{% endblock %}
+    <title>Система бронирования аудиторий</title>
+    <link rel="stylesheet" href="static/base.css">
 </head>
 <body>
-
-<header>
-    
-</header>
-
-{% block content %} {% endblock %}
-
+    <header class="header">
+        <div class="logo">🎓</div>
+        <div class="title">Система бронирования</div>
+        <div class="user-info">
+            <span class="role">Роль: {{ user.role }}</span>
+            <span class="name">{{ user.name }}</span>
+            <button id="menu-button">☰</button>
+        </div>
+    </header>
+    <aside id="sidebar" class="sidebar hidden">
+        <nav>
+            <ul>
+                <li><a href="/">Главная</a></li>
+                <li><a href="/profile">Профиль</a></li>
+                <li><a href="/booking">Бронирование</a></li>
+                <li><a href="/admin">Администрирование</a></li>
+                <li><a href="/logout">Выход</a></li>
+            </ul>
+        </nav>
+    </aside>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <script>
+        document.getElementById('menu-button').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('hidden');
+        });
+    </script>
 </body>
 </html>

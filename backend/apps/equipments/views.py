@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from apps.auth.decorators import role_required
+from apps.authentication.decorators import role_required
 from apps.equipments.models import Equipment
 from apps.equipments.serializers import EquipmentSerializer
 

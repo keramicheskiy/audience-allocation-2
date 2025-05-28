@@ -1,7 +1,8 @@
 from django.urls import path
-
-import views
+from . import views
 
 urlpatterns = [
-    path("lectures", views.get_lectures),
+    path("", views.get_lectures),
+    path("upcoming", views.get_all_upcoming_lectures),
+    path("<lecture_id>", views.delete_lecture),
 ]

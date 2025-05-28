@@ -31,11 +31,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'apps.authentication',
-    'apps.teachers',
-    'apps.moderation',
-    'apps.administration',
-    'apps.tg_bot',
-    'apps.user',
+    'apps.errors',
+    'apps.home',
+    'apps.users',
 ]
 
 MIDDLEWARE = [
@@ -72,16 +70,16 @@ WSGI_APPLICATION = 'frontend.wsgi.application'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.authentication.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.authentication.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.authentication.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.authentication.password_validation.NumericPasswordValidator',
     },
 ]
 

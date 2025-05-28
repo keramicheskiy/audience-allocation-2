@@ -20,7 +20,7 @@ def start(message):
     if not token:
         bot.reply_to(message, basic_start_message)
         return
-    response = requests.get(url=BACKEND_URL + "/auth/verify-token", cookies={"Token": token})
+    response = requests.get(url=BACKEND_URL + "/authentication/verify-token", cookies={"Token": token})
     if response.status_code == 200:
         role = response.json()["role"]
         if role == "teacher":

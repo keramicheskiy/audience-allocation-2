@@ -14,15 +14,13 @@ def authenticated():
         def wrapper(request, *args, **kwargs):
             token = request.COOKIES.get('Token')
             if not token:
-                return redirect('/auth/login')
+                return redirect('/authentication/login')
             try:
-                response = requests.get(
-                    url=BACKEND_URL + "/auth/verify-token",
-                    headers={'Authorization': f'Token {token}'}
-                )
+                cookies = {'Token': request.COOKIES.get('Token')}
+                response = requests.get(BACKEND_URL + '/authentication/verify-token', cookies=cookies)
                 if response.status_code == 200:
                     return func(request, *args, **kwargs)
-                return redirect('/auth/login')
+                return redirect('/authentication/login')
             except requests.RequestException:
                 return HttpResponse(status=504)
 
@@ -37,14 +35,13 @@ def role_required(required_role):
         def wrapper(request, *args, **kwargs):
             token = request.COOKIES.get('Token')
             if not token:
-                return redirect('/auth/login')
+                return redirect('/authentication/login')
             try:
-                response = requests.get(
-                    url=BACKEND_URL + "/auth/verify-token",
-                    headers={'Authorization': f'Token {token}'}
-                )
+                cookies = {'Token': request.COOKIES.get('Token')}
+                response = requests.get(BACKEND_URL + '/authentication/verify-token', cookies=cookies)
+
                 if response.status_code != 200:
-                    return redirect('/auth/login')
+                    return redirect('/authentication/login')
 
                 user = User(**json.loads(response.json()))
                 if user["role"] in permitted_roles(required_role):

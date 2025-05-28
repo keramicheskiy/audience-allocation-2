@@ -1,7 +1,8 @@
 from django.urls import path
-import views
+from . import views
 
 urlpatterns = [
-    path('my/lectures', views.get_own_lectures),
-    path('my/lectures/upcoming', views.get_upcoming_lectures),
+    path('lectures', views.get_own_lectures),
+    path('lectures/upcoming', views.get_upcoming_lectures),
+    path('profile', views.get_profile),
 ]

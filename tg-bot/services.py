@@ -7,7 +7,7 @@ def create_table():
 
 
 def get_token(tg_id):
-    cursor.execute('SELECT token FROM users WHERE tg_id = ?', (tg_id,))
+    cursor.execute('SELECT token FROM Token WHERE tg_id = ?', (tg_id,))
     result = cursor.fetchone()
     return result[0] if result else None
 

@@ -1,4 +1,5 @@
 services:
+
   backend:
     container_name: audience-allocation-backend
     build: ./backend
@@ -9,17 +10,14 @@ services:
     environment:
       - MODE=local
     depends_on:
-      #      - db
       - redis
     volumes:
       - ./config.yaml:/config.yaml
     command: >
       bash -c "python manage.py makemigrations &&
       python manage.py migrate &&
-      celery -A backend worker --loglevel=info &
       gunicorn backend.wsgi:application --bind 0.0.0.0:8080 --timeout 120"
-  
-  
+
 
   frontend:
     container_name: audience-allocation-frontend
@@ -39,6 +37,18 @@ services:
     command: >
       bash -c "gunicorn frontend.wsgi:application --bind 0.0.0.0:8000 --timeout 120"
 
+
+  tg-bot:
+    container_name: audience-allocation-tg-bot
+    build: ./tg-bot
+    environment:
+      - MODE=local
+    volumes:
+      - ./config.yaml:/config.yaml
+    depends_on:
+      - backend
+
+
   redis:
     container_name: audience-allocation-redis
     image: redis:7-alpine
@@ -52,33 +62,22 @@ services:
       timeout: 30s
       retries: 3
 
-  tg-bot:
-    container_name: audience-allocation-tg-bot
-    build: ./tg-bot
+
+  celery:
+    container_name: audience-allocation-celery
+    build: ./backend
+    networks:
+      - nginx_network
     environment:
       - MODE=local
-    volumes:
-      - ./config.yaml:/config.yaml
     depends_on:
       - backend
+      - redis
+    volumes:
+      - ./config.yaml:/config.yaml
+    command: >
+      celery -A backend worker --loglevel=info
 
-#  db:
-#    container_name: audience-allocation-db
-#    image: postgres
-#    restart: always
-#    volumes:
-#      - db-data:/var/lib/postgresql/data
-#    environment:
-#      - NAME = postgres
-#      - PASSWORD = postgres
-#      - HOST = db
-#    expose:
-#      - 5432
-#    healthcheck:
-#      test: [ "CMD", "pg_isready" ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
 
 volumes:
   static-data:
@@ -87,7 +86,6 @@ volumes:
 networks:
   nginx_network:
     external: true
-
 
 
 
@@ -107,7 +105,7 @@ networks:
 #   db:
 #     image: postgres
 #     restart: always
-#     user: postgres
+#     users: postgres
 #     secrets:
 #       - db-password
 #     volumes:
@@ -127,4 +125,3 @@ networks:
 # secrets:
 #   db-password:
 #     file: db/password.txt
-

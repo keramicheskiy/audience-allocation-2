@@ -4,10 +4,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from apps.auditoriums.models import Auditorium
-from apps.auth import utils
-from apps.auth.decorators import role_required
-from apps.auth.models import CustomUser
-from apps.auth.serializers import CustomUserSerializer
+from apps.authentication import utils
+from apps.authentication.decorators import role_required
+from apps.authentication.models import CustomUser
+from apps.authentication.serializers import CustomUserSerializer
 from apps.lectures.models import Lecture
 from apps.lectures.serializers import LectureSerializer
 
@@ -42,6 +42,14 @@ def manage_allowed_auditorium(request, user_id, auditorium_id):
 
 
 # localhost:8080/users/<user_id>/auditoriums
+@api_view(["GET"])
+@role_required("teacher")
+def get_allowed_auditoriums(request, user_id):
+    user = get_object_or_404(CustomUser, pk=user_id)
+    return Response({"user": CustomUserSerializer(user).data})
+
+
+# localhost:8080/users/<user_id>/auditoriums/reset
 @api_view(["DELETE"])
 @role_required("moderator")
 def reset_allowed_auditoriums(request, user_id):
@@ -79,7 +87,6 @@ def limit_amount_of_auditoriums(request):
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-
 # localhost:8080/users
 @api_view(["GET"])
 @role_required("moderator")
@@ -100,12 +107,13 @@ def change_role(request, user_id):
     new_role = user.assign_role(role)
     return Response({"role": new_role}, status=status.HTTP_200_OK)
 
+
 # localhost:8080/users/{user_id}
 @api_view(["GET"])
 @role_required("teacher")
 def get_user(request, user_id):
     user = get_object_or_404(CustomUser, pk=user_id)
-    return Response({"user": CustomUserSerializer(user).data}, status=status.HTTP_200_OK)
+    return Response({"users": CustomUserSerializer(user).data}, status=status.HTTP_200_OK)
 
 
 # localhost:8080/users/<user_id>/delete
@@ -116,3 +124,14 @@ def delete_user(request, user_id):
     user.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+# localhost:8080/users/<user_id>/lectures/<lecture_id>
+@api_view(["DELETE"])
+@role_required("moderator")
+def delete_lecture(request, user_id, lecture_id):
+    user = get_object_or_404(CustomUser, pk=user_id)
+    lecture = get_object_or_404(Lecture, pk=lecture_id)
+    if lecture.user == user:
+        lecture.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_404_NOT_FOUND)

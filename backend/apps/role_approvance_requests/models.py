@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import OneToOneField
 
-from apps.auth.models import CustomUser
+from apps.authentication.models import CustomUser
 from backend.settings import ROLES_CHOICES
 
 

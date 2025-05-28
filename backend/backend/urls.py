@@ -2,9 +2,12 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path('administration/', include("apps.administration.urls")),
-    path('teachers/', include('apps.teachers.urls')),
+    path('auditoriums/', include("apps.auditoriums.urls")),
     path('auth/', include('apps.authentication.urls')),
-    path('moderation/', include('apps.moderation.urls')),
+    path('equipments/', include('apps.equipments.urls')),
+    path('lectures/', include('apps.lectures.urls')),
+    path('my/', include('apps.my.urls')),
+    path('requests/', include('apps.role_approvance_requests.urls')),
+    path('users/', include('apps.users.urls')),
 ]
 

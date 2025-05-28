@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from . import forms
 import requests
 from frontend.settings import BACKEND_URL
-from ..teachers.decorators import logged_in
+from .decorators import authenticated
 
 
 def register(request):
@@ -13,7 +13,7 @@ def register(request):
     elif request.method == 'POST':
         form = forms.RegistrationForm(request.POST)
         if form.is_valid():
-            result = requests.post(url=BACKEND_URL + "/auth/register", json=form.cleaned_data)
+            result = requests.post(url=BACKEND_URL + "/authentication/register", json=form.cleaned_data)
             if result.status_code == 201:
                 token = result.json()['token']
                 redirection = redirect(to="/profile")
@@ -36,7 +36,7 @@ def login(request):
     elif request.method == 'POST':
         form = forms.LoginForm(request.POST)
         if form.is_valid():
-            result = requests.post(url=BACKEND_URL + "/auth/login", json=form.cleaned_data)
+            result = requests.post(url=BACKEND_URL + "/authentication/login", json=form.cleaned_data)
             if result.status_code == 200:
                 token = result.json()['token']
                 redirection = redirect(to="/profile")
@@ -52,10 +52,11 @@ def login(request):
         return HttpResponse(form.errors, status=400)
 
 
-@logged_in
+@authenticated()
 def verify_token(request):
-    response = requests.post(url=BACKEND_URL + "/auth/verify-token",
-                             headers={'Authorization': f'Token {request.Cookies.get("Token")}'})
+    cookies = {'Token': request.COOKIES.get('Token')}
+    response = requests.get(BACKEND_URL + '/authentication/verify-token', cookies=cookies)
+
     if response.status_code == 200:
-        return HttpResponse(f"Passed for {request.Cookies.get("Token")}")
+        return HttpResponse(f"Passed for {request.COOKIES.get('Token')}")
     return HttpResponse(f"Token cannot not be verified!")

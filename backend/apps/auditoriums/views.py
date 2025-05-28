@@ -5,8 +5,8 @@ from rest_framework.response import Response
 
 from apps.auditoriums.models import Auditorium
 from apps.auditoriums.serializers import AuditoriumSerializer
-from apps.auth import utils
-from apps.auth.decorators import role_required
+from apps.authentication import utils
+from apps.authentication.decorators import role_required
 from apps.lectures.models import Lecture
 from apps.lectures.services import get_lecture_intervals
 
@@ -91,9 +91,9 @@ def book_auditorium(request, auditorium_id):
 # localhost:8080/auditoriums/<auditorium_id>
 @api_view(["GET"])
 @role_required("teacher")
-def get_auditorium(request, key):
+def get_auditorium(request, auditorium_id):
     user = utils.get_user_from_request(request)
-    auditorium = get_object_or_404(Auditorium, pk=key)
+    auditorium = get_object_or_404(Auditorium, pk=auditorium_id)
 
     if auditorium not in user.allowed_auditoriums.all():
         return Response({'error': 'Аудитория недоступна.'}, status=status.HTTP_403_FORBIDDEN)

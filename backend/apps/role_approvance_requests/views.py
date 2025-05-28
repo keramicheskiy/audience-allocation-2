@@ -3,9 +3,9 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from apps.auth.decorators import role_required
-from apps.auth.models import CustomUser
-from apps.auth.serializers import CustomUserSerializer
+from apps.authentication.decorators import role_required
+from apps.authentication.models import CustomUser
+from apps.authentication.serializers import CustomUserSerializer
 from apps.role_approvance_requests.models import RoleForApproving
 from apps.role_approvance_requests.serializers import RoleForApprovingSerializer
 

@@ -1,6 +1,19 @@
+from datetime import datetime
+
 from django.db import models
 from django.conf import settings
 from apps.auditoriums.models import Auditorium
+from backend.settings import time_zone
+
+
+def get_upcoming_lectures():
+    now = datetime.now(tz=time_zone)
+    lectures = Lecture.objects.order_by('date', 'start')
+    not_yet_passed = []
+    for lecture in lectures:
+        if lecture.end > now:
+            not_yet_passed.append(lecture)
+    return not_yet_passed
 
 
 class Lecture(models.Model):

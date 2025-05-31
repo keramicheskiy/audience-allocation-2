@@ -8,7 +8,7 @@ services:
     networks:
       - nginx_network
     environment:
-      - MODE=local
+      - MODE=prod
       - CONFIG_FILE=/config.yaml
     depends_on:
       - redis
@@ -31,7 +31,7 @@ services:
     networks:
       - nginx_network
     environment:
-      - MODE=local
+      - MODE=prod
       - CONFIG_FILE=/config.yaml
     depends_on:
       - backend
@@ -44,7 +44,7 @@ services:
     container_name: audience-allocation-tg-bot
     build: ./tg-bot
     environment:
-      - MODE=local
+      - MODE=prod
       - CONFIG_FILE=/config.yaml
     volumes:
       - ./config.yaml:/config.yaml
@@ -72,7 +72,7 @@ services:
     networks:
       - nginx_network
     environment:
-      - MODE=local
+      - MODE=prod
       - CONFIG_FILE=/config.yaml
     depends_on:
       - backend

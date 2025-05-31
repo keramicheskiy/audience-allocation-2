@@ -3,38 +3,52 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}_N_A_M_E_{% endblock %}</title>
-    <link rel="stylesheet" href="static/base.css">
+    <title>{% block title %}Название{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/base.css">
     {% block meta %}{% endblock %}
-</head> 
+</head>
 <body>
-<header class="header">
-    <div class="logo">🎓</div>
-    <div class="title">Система бронирования</div>
+<header id="header">
+    <div id="logo">
+        🎓
+    </div>
+    <div id="title">Система бронирования аудиторий</div>
     <div class="user-info">
-        <span class="role">Роль: {{ user.role }}</span>
-        <span class="name">{{ user.name }}</span>
-        <button id="menu-button">☰</button>
+        <div id="user-role-box">
+            <span id="user-role">{role}</span>
+        </div>
+        <span id="username">{first_name patronymic last_name}</span>
+        <button id="menu-button" class="menu-btn">☰</button>
     </div>
 </header>
+
 <aside id="sidebar" class="sidebar hidden">
     <nav>
-        <ul>
-            <li><a href="/">Главная</a></li>
+        <ul id="base-menu">
+            <li><a href="/main">Главная</a></li>
             <li><a href="/profile">Профиль</a></li>
-            <li><a href="/booking">Бронирование</a></li>
-            <li><a href="/admin">Администрирование</a></li>
-            <li><a href="/logout">Выход</a></li>
+            <li><a href="/booking">Забронировать</a></li>
+        </ul>
+        <hr>
+        <ul id="role-based-menu">
+            <li><a href="/profile/lectures" class="menu teacher">Мои лекции</a></li>
+            <li><a href="/lectures" class="menu moderator">Все лекции</a></li>
+            <li><a href="/available-auditoriums" class="menu teacher">Доступные аудитории</a></li>
+            <li><a href="/auditoriums" class="menu moderator">Все аудитории</a></li>
+            <li><a href="/equipments" class="menu moderator">Оборудование</a></li>
+            <li><a href="/users" class="menu moderator">Пользователи</a></li>
+            <li><a href="/requests" class="menu admin">Заявки</a></li>
         </ul>
     </nav>
 </aside>
-<main>
+
+<main class="main-content">
     {% block content %}{% endblock %}
 </main>
-<script>
-    document.getElementById('menu-button').addEventListener('click', function () {
-        document.getElementById('sidebar').classList.toggle('hidden');
-    });
-</script>
+
+<script src="/static/js/utils.js"></script>
+<script src="/static/js/base.js"></script>
+
+
 </body>
 </html>

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+
+{% block title %}Оборудование{% endblock %}
+
+{% block meta %}
+    <link rel="stylesheet" href="/home/css/listlike.css">
+{% endblock %}
+
+
+{% block content %}
+
+    <div>
+        <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
+        <div id="message-popup" class="message-popup">Уведомление</div>
+        <div id="requests-block" class="requests-block">
+            <label for="name">Название</label>
+            <strong id="name_length_error" class="error-message" hidden>
+                Название должно быть уникальным и его размер должен быть хотя бы 3 буквы.
+            </strong>
+            <input type="text" name="name" id="name">
+
+            <button onclick="createEquipment()" id="createButton">Добавить</button>
+        </div>
+
+        <div id="equipmentsBlock">
+            <div class="equipment-list" id="equipmentList">
+                Загрузка...
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/js/utils.js"></script>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', fetchEquipments);
+
+        async function fetchEquipments() {
+            let response = await fetch(BACKEND_URL + '/equipments', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            if (response.ok) {
+                const equipments = response.json();
+                const container = document.getElementById('equipmentList');
+                container.innerHTML = '';
+
+                if (equipments.length === 0) {
+                    container.innerHTML = '<p>Оборудования пока нет.</p>';
+                    return;
+                }
+
+                equipments.forEach(equipment => {
+                    const item = document.createElement('div');
+                    item.className = 'equipment-item';
+
+                    const name = document.createElement('span');
+                    name.textContent = equipment.name;
+
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = 'Удалить';
+                    delBtn.onclick = () => deleteEquipment(equipment);
+                    item.appendChild(delBtn);
+
+                    item.appendChild(name);
+                    container.appendChild(item);
+                });
+            }
+        }
+
+        async function deleteEquipment(equipment) {
+            let response = await fetch(BACKEND_URL + `/equipments/${equipment.id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            if (response.ok) {
+                showMessage("Оборудование успешно удалено");
+                await fetchEquipments();
+            } else {
+                showError("Ошибка");
+            }
+        }
+
+
+        async function createEquipment() {
+            let name = document.getElementById("name");
+            document.getElementById("name_length_error").hidden = name.value !== "";
+            let response = await fetch(BACKEND_URL + '/equipments/new', {
+                method: 'POST',
+                credentials: 'include',
+                body: JSON.stringify({
+                    name: name,
+                })
+            });
+            if (response.ok) {
+                showMessage("Оборудование добавлено");
+                await fetchEquipments();
+            } else {
+                if (await response.json()["message"] !== undefined) {
+                    document.getElementById('message_length_error').hidden = false;
+                }
+                showError("Ошибка!");
+            }
+        }
+
+
+    </script>
+
+
+{% endblock %}
+

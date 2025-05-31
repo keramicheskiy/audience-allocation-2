@@ -9,6 +9,7 @@ services:
       - nginx_network
     environment:
       - MODE=local
+      - CONFIG_FILE=/config.yaml
     depends_on:
       - redis
     volumes:
@@ -31,6 +32,7 @@ services:
       - nginx_network
     environment:
       - MODE=local
+      - CONFIG_FILE=/config.yaml
     depends_on:
       - backend
     entrypoint: /entrypoint.sh
@@ -43,6 +45,7 @@ services:
     build: ./tg-bot
     environment:
       - MODE=local
+      - CONFIG_FILE=/config.yaml
     volumes:
       - ./config.yaml:/config.yaml
     depends_on:
@@ -70,6 +73,7 @@ services:
       - nginx_network
     environment:
       - MODE=local
+      - CONFIG_FILE=/config.yaml
     depends_on:
       - backend
       - redis

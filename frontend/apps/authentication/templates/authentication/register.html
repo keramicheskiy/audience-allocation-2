@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="/authentication/css/auth.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<div class="form-container">
+    <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
+    <div id="message-popup" class="message-popup">Уведомление</div>
+
+    <h2>Регистрация</h2>
+    <form id="registration-form" method="post">
+        <div class="form-group">
+            <label for="first_name">Имя</label>
+            <strong hidden id="first_name_length_error" class="error-message">Поле не может быть пустым.</strong>
+            <strong hidden id="first_name_regex_error" class="error-message">Имя должно состоять только из
+                кирилицы.</strong>
+            <input type="text" id="first_name" name="first_name" required>
+        </div>
+        <div class="form-group">
+            <label for="patronymic">Отчество</label>
+            <strong hidden id="patronymic_length_error" class="error-message">Поле не может быть пустым.</strong>
+            <strong hidden id="patronymic_regex_error" class="error-message">Отчество должно состоять только из
+                кирилицы.</strong>
+            <input type="text" id="patronymic" name="patronymic" required>
+        </div>
+        <div class="form-group">
+            <label for="last_name">Фамилия</label>
+
+            <strong hidden id="last_name_length_error" class="error-message">Поле не может быть пустым.</strong>
+            <strong hidden id="last_name_regex_error" class="error-message">Фамилия должна состоять только из
+                кирилицы.</strong>
+            <input type="text" id="last_name" name="last_name" required>
+        </div>
+        <div class="form-group">
+            <label for="email" class="error-message">Электронная почта</label>
+            <strong hidden id="email_length_regex_error" class="error-message">Поле не может быть пустым.</strong>
+            <strong hidden id="email_error" class="error-message">Введите корректный почтовый адрес.</strong>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="role">Роль</label>
+            <select id="role" name="role" required>
+                <option value="teacher">Преподаватель</option>
+                <option value="moderator">Модератор</option>
+                <option value="admin">Администратор</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль</label>
+            <strong hidden id="password_regex_error" class="error-message">
+                Пароль должен иметь минимум 8 символов,
+                хотя бы одну заглавную букву,
+                хотя бы одну строчную букву,
+                хотя бы одну цифру,
+                хотя бы один спецсимвол (!@#$%^&*)
+            </strong>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button id="register_button" type="button" class="btn">Зарегистрироваться</button>
+    </form>
+    <p class="footer-text">Уже есть аккаунт? <a href="/auth/login">Войти</a></p>
+</div>
+
+<script src="/static/js/utils.js"></script>
+<script src="/static/js/validation.js"></script>
+<script src="/authentication/js/register.js"></script>
+
+
+</body>
+</html>

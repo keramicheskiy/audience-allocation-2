@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Все лекции{% endblock %}
+
+{% block meta %}
+    <link rel="stylesheet" href="/home/css/listlike.css">
+{% endblock %}
+
+{% block content %}
+
+    <h1>Все лекции</h1>
+
+    <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
+    <div id="message-popup" class="message-popup">Уведомление</div>
+
+    <div id="lecturesBlock">
+        <label>Показывать только предстоящие лекции</label>
+        <label class="switch">
+            <input id="lecturesModeCheckbox" type="checkbox">
+            <span class="slider round"></span>
+        </label>
+        <hr>
+        <div class="lecture-list" id="lectureList">
+            Загрузка...
+        </div>
+    </div>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/validation.js"></script>
+
+    <script>
+        let lecturesModeCheckbox = document.getElementById("lecturesModeCheckbox");
+
+
+        document.addEventListener('DOMContentLoaded', fetchLectures);
+
+
+        lecturesModeCheckbox.addEventListener("change", (e) => {
+            fetchLectures();
+        })
+
+
+        async function fetchLectures() {
+            const isUpcoming = document.getElementById("lecturesModeCheckbox").checked;
+            const res = await fetch(BACKEND_URL + "/my/lectures" + (isUpcoming ? "/upcoming" : ""), {
+                method: 'GET', credentials: 'include'
+            });
+            const lectures = await res.json();
+            const container = document.getElementById('lectureList');
+            container.innerHTML = '';
+
+            if (lectures.length === 0) {
+                container.innerHTML = '<p>Лекций пока нет.</p>';
+                return;
+            }
+
+            lectures.forEach(lecture => {
+                const item = document.createElement('div');
+                item.className = 'lecture-item';
+
+                const date = document.createElement('span');
+                date.textContent = `${lecture.user.first_name} ${lecture.user.patronymic} ${lecture.user.last_name}`;
+                const name = document.createElement('span');
+                name.textContent = `${lecture.date} ${lecture.start}-${lecture.end}`;
+
+                if (isUpcoming) {
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = 'Удалить';
+                    delBtn.onclick = () => deleteLecture(lecture);
+                    item.appendChild(delBtn);
+                }
+
+                item.appendChild(date);
+                item.appendChild(name);
+                container.appendChild(item);
+            });
+        }
+
+        async function deleteLecture(lecture) {
+            await fetch(`${BACKEND_URL}/${lecture.user}/lectures/${lecture.id}`, {
+                method: 'DELETE', credentials: 'include'
+            });
+            await fetchLectures();
+        }
+
+
+    </script>
+
+{% endblock %}
+

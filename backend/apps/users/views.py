@@ -4,12 +4,14 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from apps.auditoriums.models import Auditorium
+from apps.auditoriums.serializers import AuditoriumSerializer
 from apps.authentication import utils
 from apps.authentication.decorators import role_required
 from apps.authentication.models import CustomUser
 from apps.authentication.serializers import CustomUserSerializer
 from apps.lectures.models import Lecture
 from apps.lectures.serializers import LectureSerializer
+from apps.role_approvance_requests.models import RoleForApproving
 
 
 # localhost:8080/users/<user_id>/lectures
@@ -43,10 +45,10 @@ def manage_allowed_auditorium(request, user_id, auditorium_id):
 
 # localhost:8080/users/<user_id>/auditoriums
 @api_view(["GET"])
-@role_required("teacher")
+@role_required("moderator")
 def get_allowed_auditoriums(request, user_id):
     user = get_object_or_404(CustomUser, pk=user_id)
-    return Response({"user": CustomUserSerializer(user).data})
+    return Response({"auditoriums": AuditoriumSerializer(user.allowed_auditoriums.all(), many=True).data})
 
 
 # localhost:8080/users/<user_id>/auditoriums/reset
@@ -65,7 +67,7 @@ def reset_allowed_auditoriums(request, user_id):
 @role_required("moderator")
 def limit_amount_of_hours(request):
     user = utils.get_user_from_request(request)
-    amount = request.data.get('amount')
+    amount = int(request.data.get('amount'))
     if amount >= 0:
         user.hours_limit = amount
         user.save()
@@ -79,7 +81,7 @@ def limit_amount_of_hours(request):
 @role_required("moderator")
 def limit_amount_of_auditoriums(request):
     user = utils.get_user_from_request(request)
-    amount = request.data.get('amount')
+    amount = int(request.data.get('amount'))
     if amount >= 0:
         user.booking_limit = amount
         user.save()
@@ -109,11 +111,25 @@ def change_role(request, user_id):
 
 
 # localhost:8080/users/{user_id}
-@api_view(["GET"])
+@api_view(["GET", "PATCH"])
 @role_required("teacher")
-def get_user(request, user_id):
+def manage_user(request, user_id):
     user = get_object_or_404(CustomUser, pk=user_id)
-    return Response({"users": CustomUserSerializer(user).data}, status=status.HTTP_200_OK)
+    if request.method == "GET":
+        return Response({"user": CustomUserSerializer(user).data}, status=status.HTTP_200_OK)
+    elif request.method == "PATCH":
+        curr_user = utils.get_user_from_request(request)
+        if user != curr_user:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        data = request.data.copy()
+        role_to_assign = data.pop("role", None)
+        serializer = CustomUserSerializer(user, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            if role_to_assign:
+                user.assign_role(role_to_assign)
+            return Response({"user": serializer.data}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # localhost:8080/users/<user_id>/delete
@@ -134,4 +150,14 @@ def delete_lecture(request, user_id, lecture_id):
     if lecture.user == user:
         lecture.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+# localhost:8080/users/<user_id>/wannabe
+@api_view(["GET"])
+@role_required("admin")
+def get_wannabe(request, user_id):
+    user = get_object_or_404(CustomUser, pk=user_id)
+    if RoleForApproving.objects.filter(user=user).exists():
+        return Response({"role": RoleForApproving.objects.get(user=user).wannabe_role})
     return Response(status=status.HTTP_404_NOT_FOUND)

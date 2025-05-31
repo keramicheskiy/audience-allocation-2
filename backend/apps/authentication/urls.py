@@ -6,5 +6,4 @@ urlpatterns = [
     path('login', views.login),
     path('verify-token', views.verify_token),
     path('role/is-confirmed', views.is_role_confirmed),
-    path('celery', views.test_celery),
 ]

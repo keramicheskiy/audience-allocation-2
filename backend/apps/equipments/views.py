@@ -23,6 +23,8 @@ def get_equipments(request):
 def create_equipment(request):
     serializer = EquipmentSerializer(data=request.data)
     if serializer.is_valid():
+        if Equipment.objects.filter(name=serializer.data["name"]).exists():
+            return Response({"message": "Название не уникально"}, status=status.HTTP_403_FORBIDDEN)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

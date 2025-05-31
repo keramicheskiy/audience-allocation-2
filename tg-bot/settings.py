@@ -7,7 +7,9 @@ BASE_DIR = Path(__file__).resolve().parent
 
 MODE = os.environ.get('MODE', 'local')
 
-with open('/config.yaml', 'r') as file:
+config_file = os.environ.get('CONFIG_FILE')
+
+with open(config_file, 'r') as file:
     config = yaml.safe_load(file)
 
 env = config[MODE][BASE_DIR.name]

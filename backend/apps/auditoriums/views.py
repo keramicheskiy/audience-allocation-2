@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from apps.auditoriums.models import Auditorium
 from apps.auditoriums.serializers import AuditoriumSerializer
-from apps.authentication import utils
+from apps.authentication import utils, tasks
 from apps.authentication.decorators import role_required
 from apps.lectures.models import Lecture
 from apps.lectures.services import get_lecture_intervals
@@ -54,9 +54,12 @@ def delete_auditorium(request, auditorium_id):
 # localhost:8080/auditoriums?date=2025-12-31&start=10:45&end=12:15
 @api_view(['GET'])
 @role_required("teacher")
-def get_free_auditoriums(request):
-    start, end = get_lecture_intervals(request.GET.get('date'), request.GET.get('start'), request.GET.get('end'))
+def get_auditoriums(request):
+    if not request.GET.get('date', None) or not request.GET.get('start', None) or not request.GET.get('end', None):
+        auditoriums = Auditorium.objects.all()
+        return Response({"auditoriums": AuditoriumSerializer(auditoriums, many=True).data})
 
+    start, end = get_lecture_intervals(request.GET.get('date'), request.GET.get('start'), request.GET.get('end'))
     user = utils.get_user_from_request(request)
     if validator := user.validate_booking_limit():
         return validator
@@ -72,7 +75,7 @@ def get_free_auditoriums(request):
 @api_view(['POST'])
 @role_required("teacher")
 def book_auditorium(request, auditorium_id):
-    start, end = get_lecture_intervals(request.POST.get('date'), request.POST.get('start'), request.POST.get('end'))
+    start, end = get_lecture_intervals(request.data.get('date'), request.data.get('start'), request.data.get('end'))
     auditorium = get_object_or_404(Auditorium, pk=auditorium_id)
 
     if not auditorium.is_available(start, end):
@@ -85,6 +88,11 @@ def book_auditorium(request, auditorium_id):
         return validator
 
     Lecture.objects.create(auditorium=auditorium, date=start, end=end, user=user)
+    if user.tg_id:
+        tasks.send_telegram_message.delay(
+            f"Вы забронировали аудиторию {auditorium.id} на {request.data.get('date')} "
+            f"{request.data.get('start')}-{request.data.get('end')}", user.tg_id
+        )
     return Response({'auditorium': AuditoriumSerializer(auditorium).data}, status=status.HTTP_200_OK)
 
 

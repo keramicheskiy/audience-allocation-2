@@ -33,6 +33,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     patronymic = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(unique=True)
+    tg_id = models.CharField(unique=True, default=None, max_length=30, blank=True, null=True)
     role = models.CharField(max_length=50, choices=ROLES_CHOICES, default='none', blank=True)
     is_verified = models.BooleanField(default=False)
 

@@ -1,24 +1,68 @@
 import requests
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
+from apps.authentication import utils
 from apps.authentication.decorators import authenticated, role_required
 from frontend.settings import BACKEND_URL
 
 
-# Create your views here.
-
 def home(request):
-    # TODO ДОБРО ПОЖАЛОВАТЬ ТАМ ХЗ ВоЙТИ ЗАРЕГАТЬСЯ, ЛОГОТИП НАЗВАНИЕ, КРАТКОЕ ОПИСАНИЕ
     return render(request, "home/home.html")
+
+
+def rest(request):
+    return render(request, "home/rest.html")
 
 
 @authenticated()
 def main(request):
     response = requests.get(url=BACKEND_URL + "/my/profile", cookies=request.COOKIES)
     context = {"user": response.json()}
-    return render(request, "main.html", context=context)
+    return render(request, "home/main.html", context=context)
 
 
-def rest(request):
-    return render(request, "home/rest.html")
+@role_required("moderator")
+def all_lectures(request):
+    return render(request, "home/all_lectures.html")
+
+
+@authenticated()
+def profile(request):
+    user = utils.get_user(request)
+    return redirect(f"/users/{user.get('id')}")
+
+
+@authenticated()
+def my_lectures(request):
+    return render(request, "home/my_lectures.html")
+
+
+@authenticated()
+def available_auditoriums(request):
+    return render(request, "home/available-auditoriums.html")
+
+
+@role_required("moderator")
+def all_auditoriums(request):
+    return render(request, "home/all_auditoriums.html")
+
+
+@role_required("moderator")
+def equipments(request):
+    return render(request, "home/equipments.html")
+
+
+@role_required("moderator")
+def get_users(request):
+    return render(request, "home/users.html")
+
+
+@authenticated()
+def role_approvance_requests(request):
+    return render(request, "home/requests.html")
+
+
+@authenticated()
+def get_user(request, user_id):
+    return render(request, "home/profile.html", context={"user_id": user_id})

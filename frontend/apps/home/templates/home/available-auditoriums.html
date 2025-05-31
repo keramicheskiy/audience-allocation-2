@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% block title %}Ваши лекции{% endblock %}
+
+{% block meta %}
+    <link rel="stylesheet" href="/home/css/listlike.css">
+{% endblock %}
+
+{% block content %}
+
+    <h1>Забронировать аудиторию</h1>
+
+    <div class="add-lecture">
+        <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
+        <div id="message-popup" class="message-popup">Уведомление</div>
+
+        <form id="lecture-form" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="date">Электронная почта</label>
+                <p id="passed-date-error" class="error hidden">Нельзя выбрать прошедшую дату.</p>
+                <input type="date" id="date" name="date" required lang="ru">
+            </div>
+
+            <div class="form-group">
+                <label for="start-time">Начало:</label>
+                <input
+                        list="start-time-options"
+                        id="start-time"
+                        name="start_time"
+                        placeholder="9:00"
+                        pattern="^([01]\\d|2[0-3]):[0-5]\\d$"
+                        required
+                >
+                <datalist id="start-time-options">
+                    <option value="09:00">
+                    <option value="10:45">
+                    <option value="13:00">
+                    <option value="14:45">
+                    <option value="16:30">
+                </datalist>
+            </div>
+
+            <div class="form-group">
+                <label for="end-time">Конец:</label>
+                <input
+                        list="end-time-options"
+                        id="end-time"
+                        name="end_time"
+                        placeholder="10:45"
+                        pattern="^([01]\\d|2[0-3]):[0-5]\\d$"
+                        required
+                >
+                <datalist id="end-time-options">
+                    <option value="10:30">
+                    <option value="12:15">
+                    <option value="14:30">
+                    <option value="16:15">
+                    <option value="18:00">
+                </datalist>
+            </div>
+
+            <div class="form-group">
+                <button type="button" onclick="fetchAuditoriums()">Найти доступные аудитории</button>
+            </div>
+
+            <div class="form-group">
+                <label for="auditorium">Аудитория:</label>
+                <select id="auditorium" name="auditorium" required>
+                    <option value="">Выберите доступную аудиторию</option>
+                </select>
+            </div>
+
+
+            <br><br>
+
+            <input type="reset" value="Сбросить">
+            <input type="button" onclick="createLecture()" value="Создать">
+        </form>
+    </div>
+
+
+    <h1>Ваши лекции</h1>
+
+    <div id="lecturesBlock">
+        <label>Показывать только предстоящие лекции</label>
+        <label class="switch">
+            <input id="lecturesModeCheckbox" type="checkbox">
+            <span class="slider round"></span>
+        </label>
+
+        <hr>
+
+        <div class="lecture-list" id="lectureList">
+            Загрузка...
+        </div>
+    </div>
+
+    <script src="/js/utils.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', fetchLectures);
+
+
+        async function fetchAuditoriums() {
+            const date = document.getElementById("date").value;
+            const start = document.getElementById("start-time").value;
+            const end = document.getElementById("end-time").value;
+
+            if (!date || !start || !end) {
+                showError("Заполните дату, начало и конец лекции.");
+                return;
+            }
+            const res = await fetch(`${BACKEND_URL}/auditoriums?date=${date}&start=${start}&end=${end}`);
+            const auditoriums = await res.json();
+
+            const select = document.getElementById("auditorium");
+            select.innerHTML = '<option value="">Выберите доступную аудиторию</option>'; // Очистить
+
+            if (auditoriums.length === 0) {
+                const opt = document.createElement("option");
+                opt.text = "Нет доступных аудиторий";
+                opt.disabled = true;
+                select.appendChild(opt);
+                return;
+            }
+
+            auditoriums.forEach(aud => {
+                const opt = document.createElement("option");
+                opt.value = aud.number;
+                opt.text = `${aud.name} (вместимость: ${aud.size})`;
+                select.appendChild(opt);
+            });
+        }
+
+        async function fetchLectures() {
+            const isUpcoming = document.getElementById("lecturesModeCheckbox").checked;
+            const res = await fetch(BACKEND_URL + "/my/lectures" + (isUpcoming ? "/upcoming" : ""));
+            const lectures = await res.json();
+            const container = document.getElementById('lectureList');
+            container.innerHTML = '';
+
+            if (lectures.length === 0) {
+                container.innerHTML = '<p>Лекций пока нет.</p>';
+                return;
+            }
+
+            lectures.forEach(lecture => {
+                const item = document.createElement('div');
+                item.className = 'lecture-item';
+
+                const title = document.createElement('span');
+                title.textContent = lecture.title;
+
+                if (isUpcoming) {
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = 'Удалить';
+                    delBtn.onclick = () => deleteLecture(lecture.id);
+                    item.appendChild(delBtn);
+                }
+
+                item.appendChild(title);
+                container.appendChild(item);
+            });
+        }
+
+        async function deleteLecture(id) {
+            await fetch(`${BACKEND_URL}/lectures/${id}`, {
+                method: 'DELETE'
+            });
+            await fetchLectures();
+        }
+
+
+        async function createLecture(event) {
+            event.preventDefault();
+
+            const dateInput = document.getElementById("date");
+            const startInput = document.getElementById("start-time");
+            const endInput = document.getElementById("end-time");
+            const auditoriumSelect = document.getElementById("auditorium");
+
+            const date = dateInput.value;
+            const start = startInput.value;
+            const end = endInput.value;
+            const auditorium = auditoriumSelect.value;
+
+            const passedDateError = document.getElementById("passed-date-error");
+            passedDateError.classList.add("hidden");
+
+            const now = new Date();
+            const selectedDateTime = new Date(`${date}T${start}`);
+            if (selectedDateTime < now) {
+                passedDateError.classList.remove("hidden");
+                return;
+            }
+
+            if (!date || !start || !end || !auditorium) {
+                showError("Заполните все поля, включая выбор аудитории.");
+                return;
+            }
+
+
+            const response = await fetch(`${BACKEND_URL}/auditoriums/${auditorium}/book`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    date: date,
+                    start: start,
+                    end: end
+                }),
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                showError("Ошибка: " + (err.detail || "не удалось создать лекцию"));
+                return;
+            }
+
+            showMessage("Лекция успешно создана!");
+            await fetchLectures();
+        }
+
+
+    </script>
+
+{% endblock %}
+

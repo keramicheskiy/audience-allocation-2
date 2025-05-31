@@ -1,24 +1,43 @@
-{% load static %}
-{% block title %}Login{% endblock %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <link rel="stylesheet" href="/authentication/css/auth.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<div class="form-container">
+    <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
+    <div id="message-popup" class="message-popup">Уведомление</div>
 
-
-{% block meta %}
-    <link rel="stylesheet" href="{% static 'static/base.css' %}">
-{% endblock %}
-
-
-{% block content %}
     <h2>Вход</h2>
-
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Войти</button>
+    <form id="login-form" method="post">
+        <div class="form-group">
+            <label for="email">Электронная почта</label>
+            <strong hidden id="email_length_error" class="error-message">Поле не может быть пустым.</strong>
+            <strong hidden id="email_regex_error" class="error-message">Введите корректный почтовый адрес.</strong>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль</label>
+            <strong hidden id="password_regex_error" class="error-message">
+                Пароль должен иметь минимум 8 символов,
+                хотя бы одну заглавную букву,
+                хотя бы одну строчную букву,
+                хотя бы одну цифру,
+                хотя бы один спецсимвол (!@#$%^&*)
+            </strong>
+            <input type="text" id="password" name="password" required>
+        </div>
+        <button type="button" id="login-button" class="btn">Войти</button>
     </form>
+    <p class="footer-text">Нет аккаунта? <a href="/auth/register">Зарегистрироваться</a></p>
+</div>
 
-    {% for message in messages %}
-        <p style="color: green;">{{ message }}</p>
-    {% endfor %}
+<script src="/static/js/utils.js"></script>
+<script src="/static/js/validation.js"></script>
+<script src="/authentication/js/login.js"></script>
 
-    <a href="/auth/register">Зарегистрироваться</a>
-{% endblock %}
+</body>
+</html>

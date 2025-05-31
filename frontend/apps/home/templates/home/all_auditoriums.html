@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Все аудитории{% endblock %}
+
+{% block meta %}
+    <link rel="stylesheet" href="/css/listlike.css">
+{% endblock %}
+
+{% block content %}
+    <div>
+        <form id="auditoriumForm">
+            <label for="number">Номер аудитории:</label>
+            <input type="text" id="number" name="number" required>
+
+            <label for="size">Размер аудитории:</label>
+            <input type="number" id="size" name="size" value="1" min="1" required>
+
+            <label for="equipment">Оборудование:</label>
+            <select id="equipment" name="equipment" required>
+                <option value="">Выберите оборудование...</option>
+            </select>
+
+            <label for="location">Расположение:</label>
+            <input type="text" id="location" name="location" required>
+
+            <label for="description">Описание:</label><br>
+            <textarea id="description" name="description" rows="4" cols="50"></textarea>
+
+            <button type="button" id="saveButton" onclick="saveAuditorium()">Сохранить</button>
+        </form>
+
+        <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
+        <div id="message-popup" class="message-popup">Уведомление</div>
+
+        <h1>Все аудитории</h1>
+        <div id="requestsBlock">
+            <div class="request-list" id="requestList">
+                Загрузка...
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/validation.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchEquipments();
+            fetchAuditoriums();
+        });
+
+
+        let number = document.getElementById('number');
+        let size = document.getElementById('size');
+        let equipment = document.getElementById('equipment');
+        let location = document.getElementById('location');
+        let description = document.getElementById('description');
+
+        async function fetchEquipments() {
+            const response = await fetch(BACKEND_URL + '/equipments', {
+                method: 'GET',
+                credentials: 'include',
+            });
+            const equipments = await response.json();
+            const select = document.getElementById("equipment");
+
+            equipments.forEach(e => {
+                const opt = document.createElement("option");
+                opt.value = e.id;
+                opt.text = e.name;
+                select.appendChild(opt);
+            });
+        }
+
+        async function fetchAuditoriums() {
+            const response = await fetch(BACKEND_URL + "/auditoriums", {
+                method: "GET",
+                credentials: "include"
+            });
+            let auditoriums = await response.json();
+            const container = document.getElementById("requestList");
+            container.innerHTML = "";
+
+            if (auditoriums.length === 0) {
+                container.innerHTML = '<p>Аудиторий пока нет.</p>';
+                return;
+            }
+
+            auditoriums.forEach((auditorium) => {
+                const item = document.createElement('div');
+                item.className = 'auditorium-item';
+
+                const number = document.createElement('span');
+                number.textContent = "Номер: " + auditorium.number;
+
+                const size = document.createElement('span');
+                size.textContent = "Размер: " + auditorium.size;
+
+                const equipment = document.createElement('span');
+                equipment.textContent = "Оборудование: " + (auditorium.equipment?.name || '—');
+
+                const location = document.createElement('span');
+                location.textContent = "Расположение: " + auditorium.location;
+
+                const description = document.createElement('span');
+                description.textContent = "Описание: " + auditorium.description;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Удалить';
+                deleteBtn.onclick = () => deleteAuditorium(auditorium);
+
+                item.appendChild(number);
+                item.appendChild(size);
+                item.appendChild(equipment);
+                item.appendChild(location);
+                item.appendChild(description);
+                item.appendChild(deleteBtn);
+                container.appendChild(item);
+            });
+        }
+
+        async function deleteAuditorium(auditorium) {
+            let response = await fetch(`${BACKEND_URL}/auditoriums/${auditorium.id}/delete`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            if (response.ok) {
+                showMessage("Аудитория удалена");
+                await fetchAuditoriums();
+            } else {
+                showError("Ошибка при удалении");
+            }
+        }
+
+        async function saveAuditorium() {
+            const valid = validate(number, /^[A-Za-zА-Яа-я0-9-]+$/);
+            if (valid && size.value > 0 && location.value.trim() !== "") {
+                const response = await fetch(BACKEND_URL + "/auditoriums/new", {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        number: number.value,
+                        size: parseInt(size.value),
+                        equipment: parseInt(equipment.value),
+                        location: location.value,
+                        description: description.value,
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage("Аудитория успешно создана");
+                    number.value = "";
+                    size.value = 1;
+                    equipment.value = "";
+                    location.value = "";
+                    description.value = "";
+                    await fetchAuditoriums();
+                } else {
+                    showError("Ошибка при создании аудитории");
+                }
+            } else {
+                showError("Проверьте правильность заполнения формы");
+            }
+        }
+    </script>
+{% endblock %}

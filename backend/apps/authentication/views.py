@@ -15,7 +15,7 @@ from apps.role_approvance_requests.models import RoleForApproving
 
 
 # localhost:8080/auth/register
-# {"first_name": "", "patronymic": "", "last_name": "", "email": "", "password": "", "role": ""}
+# {"first_name": "", "patronymic": "", "last_name": "", "email": "", "password": "", "role": "", "tg_id": ""}
 @api_view(['POST', 'GET'])
 def register(request):
     if request.method == 'GET':
@@ -23,9 +23,14 @@ def register(request):
 
     elif request.method == 'POST':
         print("Получены данные:", request.data)
+        data = request.data.copy()
+        if tg_id := request.data.get("tg_id", None):
+            data.pop("tg_id")
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            user.tg_id = tg_id
+            user.save()
             token = Token.objects.create(user=user)
             verify_email(user)
             notify_moderators(user)
@@ -41,7 +46,7 @@ def register(request):
 
 
 # localhost:8080/auth/login
-# {"email": "", "password": ""}
+# {"email": "", "password": "", "tg_id": ""}
 @api_view(["GET", "POST"])
 def login(request):
     if request.method == 'GET':
@@ -49,13 +54,17 @@ def login(request):
     elif request.method == 'POST':
         email = request.data.get('email')
         password = request.data.get('password')
+        tg_id = request.data.get('tg_id', None)
         if not email or not password:
             return Response({'error': 'Email и пароль обязательны'}, status=status.HTTP_400_BAD_REQUEST)
         user = get_object_or_404(CustomUser, email=email)
+        if tg_id:
+            user.tg_id = tg_id
+            user.save()
         if not user.check_password(password):
             return Response({'error': 'missing users'}, status=status.HTTP_404_NOT_FOUND)
         token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key, 'users': CustomUserSerializer(user).data})
+        return Response({'token': token.key, 'user': CustomUserSerializer(user).data})
 
 
 # localhost:8080/auth/verify-token
@@ -74,11 +83,3 @@ def is_role_confirmed(request):
     if RoleForApproving.objects.find(user=user).exists():
         return Response(status=status.HTTP_403_FORBIDDEN)
     return Response({"role": user.role}, status=status.HTTP_200_OK)
-
-
-# localhost:8080/auth/celery
-# {"message": ""}
-@api_view(['POST'])
-def test_celery(request):
-    tasks.send_telegram_message.delay(message=request.POST.get('message'))
-    return Response(status=status.HTTP_200_OK)

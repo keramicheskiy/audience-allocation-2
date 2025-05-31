@@ -9,7 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 MODE = os.environ.get('MODE', 'local')
 
-with open('/config.yaml', 'r') as file:
+config_file = os.environ.get('CONFIG_FILE')
+
+with open(config_file, 'r') as file:
     config = yaml.safe_load(file)
 
 env = config[MODE][BASE_DIR.name]
@@ -155,3 +157,5 @@ ROLES = ["teacher", "moderator", "admin"]
 
 def permitted_roles(role):
     return ROLES[ROLES.index(role):]
+
+TELEGRAM_BOT_TOKEN = env["telegram"].get('TOKEN')

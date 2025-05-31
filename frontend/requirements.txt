@@ -3,3 +3,4 @@ gunicorn
 requests
 dotenv
 pyyaml
+whitenoise

@@ -23,24 +23,15 @@ def register(request):
 
     elif request.method == 'POST':
         print("Получены данные:", request.data)
-        data = request.data.copy()
-        if tg_id := request.data.get("tg_id", None):
-            data.pop("tg_id")
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            user.tg_id = tg_id
-            user.save()
             token = Token.objects.create(user=user)
             verify_email(user)
             notify_moderators(user)
 
-            response = Response({
-                'token': token.key,
-                'users': CustomUserSerializer(user).data
-            }, status=status.HTTP_201_CREATED)
-
-            return response
+            return Response({
+                'token': token.key, 'users': CustomUserSerializer(user).data}, status=status.HTTP_201_CREATED)
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -72,7 +63,7 @@ def login(request):
 @authenticated()
 def verify_token(request):
     user = utils.get_user_from_request(request)
-    return Response({"users": user}, status=status.HTTP_200_OK)
+    return Response({"user": CustomUserSerializer(user).data}, status=status.HTTP_200_OK)
 
 
 # localhost:8080/auth/role/is-confirmed
@@ -82,4 +73,4 @@ def is_role_confirmed(request):
     user = utils.get_user_from_request(request)
     if RoleForApproving.objects.find(user=user).exists():
         return Response(status=status.HTTP_403_FORBIDDEN)
-    return Response({"role": user.role}, status=status.HTTP_200_OK)
+    return Response({"role": str(user.role)}, status=status.HTTP_200_OK)

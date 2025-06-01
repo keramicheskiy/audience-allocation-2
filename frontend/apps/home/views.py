@@ -1,5 +1,4 @@
 import requests
-from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 from apps.authentication import utils
@@ -11,26 +10,17 @@ def home(request):
     return render(request, "home/home.html")
 
 
-def rest(request):
-    return render(request, "home/rest.html")
-
 
 @authenticated()
 def main(request):
     response = requests.get(url=BACKEND_URL + "/my/profile", cookies=request.COOKIES)
     context = {"user": response.json()}
-    return render(request, "home/main.html", context=context)
+    return render(request, "base.html", context=context)
 
 
 @role_required("moderator")
 def all_lectures(request):
     return render(request, "home/all_lectures.html")
-
-
-@authenticated()
-def profile(request):
-    user = utils.get_user(request)
-    return redirect(f"/users/{user.get('id')}")
 
 
 @authenticated()
@@ -40,7 +30,7 @@ def my_lectures(request):
 
 @authenticated()
 def available_auditoriums(request):
-    return render(request, "home/available-auditoriums.html")
+    return render(request, "home/booking.html")
 
 
 @role_required("moderator")
@@ -66,3 +56,10 @@ def role_approvance_requests(request):
 @authenticated()
 def get_user(request, user_id):
     return render(request, "home/profile.html", context={"user_id": user_id})
+
+
+@authenticated()
+def profile(request):
+    response = requests.get(url=BACKEND_URL + "/my/profile", cookies=request.COOKIES)
+    user = response.json()["user"]
+    return redirect(f"/users/{user['id']}")

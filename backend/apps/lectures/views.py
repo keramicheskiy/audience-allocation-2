@@ -12,7 +12,7 @@ from apps.lectures.serializers import LectureSerializer
 @api_view(['GET'])
 @role_required('moderator')
 def get_lectures(request):
-    lectures = Lecture.objects.all().order_by('date', 'start')
+    lectures = Lecture.objects.all().order_by('start')
     return Response({'lectures': LectureSerializer(lectures, many=True).data})
 
 

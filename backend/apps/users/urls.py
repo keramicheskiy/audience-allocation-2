@@ -8,7 +8,6 @@ urlpatterns = [
     path('<user_id>/delete', views.delete_user),
     path("<user_id>/lectures", views.lectures_from_teacher),
     path("<user_id>/lectures/<lecture_id>", views.delete_lecture),
-    path("<user_id>/auditoriums/<auditorium_id>", views.manage_allowed_auditorium),
     path("<user_id>/auditoriums", views.get_allowed_auditoriums),
     path("<user_id>/auditoriums/reset", views.reset_allowed_auditoriums),
     path("<user_id>/limit/hours", views.limit_amount_of_hours),

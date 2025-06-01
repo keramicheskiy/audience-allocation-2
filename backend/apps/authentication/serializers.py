@@ -11,17 +11,17 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = [
             'id', 'first_name', 'patronymic', 'last_name', 'email', 'role',
-            'is_verified', 'booking_limit', 'hours_limit', 'allowed_auditoriums'
+            'is_verified', 'booking_limit', 'hours_limit', 'allowed_auditoriums', 'tg_id'
         ]
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'patronymic', 'last_name', 'email', 'password', 'role']
+        fields = ['first_name', 'patronymic', 'last_name', 'email', 'password', 'role', 'tg_id']
 
 
 class LoginSerializer(serializers.Serializer):
     class Meta:
         model = CustomUser
-        fields = ['email', 'password']
+        fields = ['email', 'password', 'tg_id']

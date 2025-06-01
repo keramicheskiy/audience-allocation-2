@@ -16,9 +16,8 @@ def login(request):
 @authenticated()
 def verify_token(request):
     cookies = {'Token': request.COOKIES.get('Token')}
-    response = requests.get(BACKEND_URL + '/authentication/verify-token', cookies=cookies)
+    response = requests.get(BACKEND_URL + '/auth/verify-token', cookies=cookies)
 
     if response.status_code == 200:
         return HttpResponse(f"Passed for {request.COOKIES.get('Token')} ({response.json()})")
-    return HttpResponse(f"Token cannot not be verified!")
-
+    return HttpResponse(f"Token cannot not be verified! ({request.COOKIES.get('Token')}")

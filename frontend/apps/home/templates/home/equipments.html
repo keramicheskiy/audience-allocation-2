@@ -1,37 +1,42 @@
 {% extends "base.html" %}
-
+{% load static %}
 
 {% block title %}Оборудование{% endblock %}
 
 {% block meta %}
-    <link rel="stylesheet" href="/home/css/listlike.css">
+    <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
+    <link rel="stylesheet" href="{% static "home/css/equipment.css" %}">
 {% endblock %}
 
 
 {% block content %}
+    <body>
 
-    <div>
-        <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
-        <div id="message-popup" class="message-popup">Уведомление</div>
-        <div id="requests-block" class="requests-block">
-            <label for="name">Название</label>
-            <strong id="name_length_error" class="error-message" hidden>
-                Название должно быть уникальным и его размер должен быть хотя бы 3 буквы.
-            </strong>
-            <input type="text" name="name" id="name">
+    <div class="equipment-page">
+        <div class="container">
+            <h1>Оборудование</h1>
 
-            <button onclick="createEquipment()" id="createButton">Добавить</button>
-        </div>
+            <div>
+                <label for="inputName">Название оборудования</label>
+                <input type="text" id="inputName" name="name" placeholder="Введите название" autocomplete="off"
+                       minlength="3"/>
+                <div id="nameError" class="error-message">Название должно быть уникальным и минимум 3 символа.</div>
 
-        <div id="equipmentsBlock">
-            <div class="equipment-list" id="equipmentList">
-                Загрузка...
+                <button id="btnCreateEquipment" disabled>Добавить оборудование</button>
             </div>
-        </div>
 
+            <div id="equipmentList">
+                <p>Загрузка...</p>
+            </div>
+
+            <div id="messageBox" class="message"></div>
+        </div>
     </div>
 
-    <script src="/js/utils.js"></script>
+    </body>
+
+
+    <script src="{% static "js/utils.js" %}"></script>
 
     <script>
 
@@ -43,7 +48,7 @@
                 credentials: 'include'
             });
             if (response.ok) {
-                const equipments = response.json();
+                const equipments = (await response.json()).equipments;
                 const container = document.getElementById('equipmentList');
                 container.innerHTML = '';
 
@@ -62,9 +67,9 @@
                     const delBtn = document.createElement('button');
                     delBtn.textContent = 'Удалить';
                     delBtn.onclick = () => deleteEquipment(equipment);
-                    item.appendChild(delBtn);
 
                     item.appendChild(name);
+                    item.appendChild(delBtn);
                     container.appendChild(item);
                 });
             }
@@ -89,6 +94,9 @@
             document.getElementById("name_length_error").hidden = name.value !== "";
             let response = await fetch(BACKEND_URL + '/equipments/new', {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 credentials: 'include',
                 body: JSON.stringify({
                     name: name,
@@ -98,7 +106,7 @@
                 showMessage("Оборудование добавлено");
                 await fetchEquipments();
             } else {
-                if (await response.json()["message"] !== undefined) {
+                if ((await response.json())["message"] !== undefined) {
                     document.getElementById('message_length_error').hidden = false;
                 }
                 showError("Ошибка!");

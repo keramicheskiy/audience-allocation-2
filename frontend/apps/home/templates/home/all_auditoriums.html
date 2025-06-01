@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Все аудитории{% endblock %}
 
 {% block meta %}
-    <link rel="stylesheet" href="/css/listlike.css">
+    <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
 {% endblock %}
 
 {% block content %}
@@ -29,9 +30,6 @@
             <button type="button" id="saveButton" onclick="saveAuditorium()">Сохранить</button>
         </form>
 
-        <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
-        <div id="message-popup" class="message-popup">Уведомление</div>
-
         <h1>Все аудитории</h1>
         <div id="requestsBlock">
             <div class="request-list" id="requestList">
@@ -40,8 +38,8 @@
         </div>
     </div>
 
-    <script src="/js/utils.js"></script>
-    <script src="/js/validation.js"></script>
+    <script src="{% static "js/utils.js" %}"></script>
+    <script src="{% static "js/validation.js" %}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -166,4 +164,5 @@
             }
         }
     </script>
+
 {% endblock %}

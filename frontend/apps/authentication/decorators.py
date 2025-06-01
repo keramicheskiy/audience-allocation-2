@@ -3,7 +3,6 @@ from functools import wraps
 import requests
 from django.http import HttpResponse
 from django.shortcuts import redirect
-
 from .dataclasses import User
 from frontend.settings import BACKEND_URL, permitted_roles
 
@@ -16,7 +15,7 @@ def authenticated():
             if not token:
                 return redirect('/auth/login')
             try:
-                cookies = {'Token': request.COOKIES.get('Token')}
+                cookies = {'Token': token}
                 response = requests.get(BACKEND_URL + '/auth/verify-token', cookies=cookies)
                 if response.status_code == 200:
                     return func(request, *args, **kwargs)
@@ -37,16 +36,16 @@ def role_required(required_role):
             if not token:
                 return redirect('/auth/login')
             try:
-                cookies = {'Token': request.COOKIES.get('Token')}
-                response = requests.get(BACKEND_URL + '/auth/verify-token', cookies=cookies)
+                response = requests.get(BACKEND_URL + '/auth/verify-token', cookies=request.COOKIES)
 
                 if response.status_code != 200:
                     return redirect('/auth/login')
 
-                user = User(**json.loads(response.json()))
+                user = response.json()['user']
+
                 if user["role"] in permitted_roles(required_role):
                     return func(request, *args, **kwargs)
-                return redirect('/errors/wrong_role')  # TODO СДЕЛАТЬ ПРИЛОЖЕНИЕ errors
+                return HttpResponse(status=403)
             except requests.RequestException:
                 return HttpResponse(status=504)
 

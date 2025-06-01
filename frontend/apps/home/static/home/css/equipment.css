@@ -1,16 +1,16 @@
-body {
+.equipment-page body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 20px;
     background-color: #f8f9fa;
     color: #333;
 }
 
-h1 {
+.equipment-page h1 {
     font-size: 28px;
     margin-bottom: 20px;
 }
 
-.add-lecture {
+.equipment-page .add-lecture {
     background: #fff;
     padding: 20px;
     border-radius: 12px;
@@ -19,20 +19,20 @@ h1 {
     max-width: 600px;
 }
 
-.form-group {
+.equipment-page .form-group {
     margin-bottom: 20px;
 }
 
-label {
+.equipment-page label {
     display: block;
     margin-bottom: 5px;
     font-weight: 600;
 }
 
-input[type="date"],
-input[type="text"],
-input[type="time"],
-input[list] {
+.equipment-page input[type="date"],
+.equipment-page input[type="text"],
+.equipment-page input[type="time"],
+.equipment-page input[list] {
     width: 100%;
     padding: 8px 12px;
     border-radius: 6px;
@@ -40,9 +40,9 @@ input[list] {
     font-size: 14px;
 }
 
-input[type="submit"],
-input[type="reset"],
-button {
+.equipment-page input[type="submit"],
+.equipment-page input[type="reset"],
+.equipment-page button {
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
@@ -53,34 +53,34 @@ button {
     transition: background-color 0.3s;
 }
 
-input[type="submit"]:hover,
-input[type="reset"]:hover,
-button:hover {
+.equipment-page input[type="submit"]:hover,
+.equipment-page input[type="reset"]:hover,
+.equipment-page button:hover {
     background-color: #0056b3;
 }
 
-.error {
+.equipment-page .error {
     color: red;
     font-size: 14px;
 }
 
-.hidden {
+.equipment-page .hidden {
     display: none;
 }
 
-#lecturesBlock {
+.equipment-page #lecturesBlock {
     max-width: 700px;
     margin-top: 40px;
 }
 
-.lecture-list {
+.equipment-page .lecture-list {
     background: #fff;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.lecture-item {
+.equipment-page .lecture-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -88,11 +88,11 @@ button:hover {
     border-bottom: 1px solid #eee;
 }
 
-.lecture-item:last-child {
+.equipment-page .lecture-item:last-child {
     border-bottom: none;
 }
 
-.switch {
+.equipment-page .switch {
     position: relative;
     display: inline-block;
     width: 46px;
@@ -101,13 +101,13 @@ button:hover {
     vertical-align: middle;
 }
 
-.switch input {
+.equipment-page .switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-.slider {
+.equipment-page .slider {
     position: absolute;
     cursor: pointer;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -116,7 +116,7 @@ button:hover {
     border-radius: 24px;
 }
 
-.slider:before {
+.equipment-page .slider:before {
     position: absolute;
     content: "";
     height: 18px;
@@ -128,19 +128,19 @@ button:hover {
     border-radius: 50%;
 }
 
-input:checked + .slider {
+.equipment-page input:checked + .slider {
     background-color: #007bff;
 }
 
-input:checked + .slider:before {
+.equipment-page input:checked + .slider:before {
     transform: translateX(22px);
 }
 
-.error-message {
+.equipment-page .error-message {
     color: #a94442;
 }
 
-.error-popup {
+.equipment-page .error-popup {
     display: none;
     position: fixed;
     top: 20px;
@@ -153,5 +153,3 @@ input:checked + .slider:before {
     z-index: 1000;
     font-family: Arial, sans-serif;
 }
-
-

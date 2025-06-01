@@ -4,20 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Название{% endblock %}</title>
-    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block meta %}{% endblock %}
 </head>
 <body>
-<header id="header">
+<header id="header" class="header">
     <div id="logo">
         🎓
     </div>
     <div id="title">Система бронирования аудиторий</div>
     <div class="user-info">
         <div id="user-role-box">
-            <span id="user-role">{role}</span>
+            <span id="user-role"></span>
         </div>
-        <span id="username">{first_name patronymic last_name}</span>
+        <span id="username"></span>
         <button id="menu-button" class="menu-btn">☰</button>
     </div>
 </header>
@@ -33,7 +33,6 @@
         <ul id="role-based-menu">
             <li><a href="/profile/lectures" class="menu teacher">Мои лекции</a></li>
             <li><a href="/lectures" class="menu moderator">Все лекции</a></li>
-            <li><a href="/available-auditoriums" class="menu teacher">Доступные аудитории</a></li>
             <li><a href="/auditoriums" class="menu moderator">Все аудитории</a></li>
             <li><a href="/equipments" class="menu moderator">Оборудование</a></li>
             <li><a href="/users" class="menu moderator">Пользователи</a></li>
@@ -42,13 +41,80 @@
     </nav>
 </aside>
 
+<div id="error-popup" class="error-popup" hidden>Ошибка! Что-то пошло не так.</div>
+<div id="message-popup" class="message-popup" hidden>Уведомление</div>
+
 <main class="main-content">
     {% block content %}{% endblock %}
 </main>
 
-<script src="/static/js/utils.js"></script>
-<script src="/static/js/base.js"></script>
+<script src="{% static 'js/utils.js' %}"></script>
+<script>
 
+    document.getElementById('menu-button').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('hidden');
+    });
+    document.getElementById('username').addEventListener('click', () => {
+        window.location.href = `/profile`;
+    });
+
+
+    async function initApp() {
+        try {
+            await verifyTokenAndSetUser();
+        } catch (error) {
+            console.error("Ошибка инициализации:", error);
+        }
+    }
+
+
+    async function verifyTokenAndSetUser() {
+        if (!getCookie("Token")) {
+            window.location.replace('/auth/login');
+        }
+        console.log(getCookie("Token"));
+
+
+        const response = await fetch(`${BACKEND_URL}/auth/verify-token`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        if (response.ok) {
+            const resp = await response.json();
+            const user = resp.user;
+            console.log(user);
+
+            updateUI(user);
+            hideUnavailableElements(user.role);
+        } else {
+            window.location.replace('/auth/login');
+        }
+    }
+
+    function updateUI(user) {
+        document.getElementById('user-role').textContent = user.role;
+        document.getElementById('user-role-box').style.color = ROLES_COLORS[user.role];
+        document.getElementById('username').textContent =
+            `${user.last_name} ${user.first_name} ${user.patronymic}`;
+    }
+
+    function getPermittedRoles(role) {
+        const ROLES = ["teacher", "moderator", "admin"];
+        return ROLES.slice(ROLES.indexOf(role), ROLES.length);
+    }
+
+    function hideUnavailableElements(user_role) {
+        if (ROLES.indexOf(user_role) === -1) user_role = "teacher";
+        let unavailable_roles = ROLES.slice(ROLES.indexOf(user_role) + 1, ROLES.length);
+        for (let unavailable_role of unavailable_roles) {
+            for (let element of document.getElementsByClassName(`menu ${unavailable_role}`)) {
+                element.style.display = 'none';
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+</script>
 
 </body>
 </html>

@@ -23,32 +23,29 @@ def lectures_from_teacher(request, user_id):
     return Response({'lectures': LectureSerializer(lectures, many=True).data})
 
 
-# localhost:8080/users/<user_id>/auditoriums/<auditorium_id>
-# {}
-@api_view(["POST", "DELETE"])
+# localhost:8080/users/<user_id>/auditoriums
+# {"auditorium_id": 1}
+@api_view(["GET", "POST", "DELETE"])
 @role_required("moderator")
-def manage_allowed_auditorium(request, user_id, auditorium_id):
-    if request.method == "POST":
+def get_allowed_auditoriums(request, user_id):
+    if request.method == "GET":
+        user = get_object_or_404(CustomUser, pk=user_id)
+        return Response({"auditoriums": AuditoriumSerializer(user.allowed_auditoriums.all(), many=True).data})
+    elif request.method == "POST":
+        auditorium_id = request.data.get("auditorium_id")
         auditorium = get_object_or_404(Auditorium, pk=auditorium_id)
         user = get_object_or_404(CustomUser, pk=user_id)
         if auditorium not in user.allowed_auditoriums.all():
             user.allowed_auditoriums.add(auditorium)
             user.save()
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_201_CREATED)
     elif request.method == "DELETE":
+        auditorium_id = request.data.get("auditorium_id")
         user = get_object_or_404(CustomUser, pk=user_id)
         auditorium = get_object_or_404(Auditorium, pk=auditorium_id)
         user.allowed_auditoriums.remove(auditorium)
         user.save()
-        return Response(status=status.HTTP_200_OK)
-
-
-# localhost:8080/users/<user_id>/auditoriums
-@api_view(["GET"])
-@role_required("moderator")
-def get_allowed_auditoriums(request, user_id):
-    user = get_object_or_404(CustomUser, pk=user_id)
-    return Response({"auditoriums": AuditoriumSerializer(user.allowed_auditoriums.all(), many=True).data})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # localhost:8080/users/<user_id>/auditoriums/reset
@@ -65,10 +62,10 @@ def reset_allowed_auditoriums(request, user_id):
 # {"amount": 1}
 @api_view(["PATCH"])
 @role_required("moderator")
-def limit_amount_of_hours(request):
-    user = utils.get_user_from_request(request)
+def limit_amount_of_hours(request, user_id):
     amount = int(request.data.get('amount'))
     if amount >= 0:
+        user = get_object_or_404(CustomUser, pk=user_id)
         user.hours_limit = amount
         user.save()
         return Response(status=status.HTTP_200_OK)
@@ -79,10 +76,10 @@ def limit_amount_of_hours(request):
 # {"amount": 1}
 @api_view(["PATCH"])
 @role_required("moderator")
-def limit_amount_of_auditoriums(request):
-    user = utils.get_user_from_request(request)
+def limit_amount_of_auditoriums(request, user_id):
     amount = int(request.data.get('amount'))
     if amount >= 0:
+        user = get_object_or_404(CustomUser, pk=user_id)
         user.booking_limit = amount
         user.save()
         return Response(status=status.HTTP_200_OK)
@@ -127,7 +124,7 @@ def manage_user(request, user_id):
         if serializer.is_valid():
             serializer.save()
             if role_to_assign:
-                user.assign_role(role_to_assign)
+                RoleForApproving.objects.get_or_create(user=curr_user, wannabe_role=role_to_assign)
             return Response({"user": serializer.data}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

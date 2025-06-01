@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Регистрация</title>
-    <link rel="stylesheet" href="/authentication/css/auth.css">
+    <link rel="stylesheet" href="{% static "authentication/css/auth.css" %}">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 <div class="form-container">
-    <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
-    <div id="message-popup" class="message-popup">Уведомление</div>
+    <div id="error-popup" class="error-popup" hidden>Ошибка! Что-то пошло не так.</div>
+    <div id="message-popup" class="message-popup" hidden>Уведомление</div>
 
     <h2>Регистрация</h2>
     <form id="registration-form" method="post">
@@ -30,7 +30,6 @@
         </div>
         <div class="form-group">
             <label for="last_name">Фамилия</label>
-
             <strong hidden id="last_name_length_error" class="error-message">Поле не может быть пустым.</strong>
             <strong hidden id="last_name_regex_error" class="error-message">Фамилия должна состоять только из
                 кирилицы.</strong>
@@ -66,9 +65,64 @@
     <p class="footer-text">Уже есть аккаунт? <a href="/auth/login">Войти</a></p>
 </div>
 
-<script src="/static/js/utils.js"></script>
-<script src="/static/js/validation.js"></script>
-<script src="/authentication/js/register.js"></script>
+<script src="{% static "js/utils.js" %}"></script>
+<script src="{% static "js/validation.js" %}"></script>
+
+<script>
+
+    let firstName = document.getElementById('first_name');
+    let patronymic = document.getElementById('patronymic');
+    let lastName = document.getElementById('last_name');
+    let email = document.getElementById('email');
+    let password = document.getElementById('password');
+    let registerButton = document.getElementById('register_button');
+
+    let tg_id = null;
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+            tg_id = tg.initDataUnsafe.user.id;
+        }
+    }
+
+    registerButton.addEventListener('click', async () => {
+        if (validate(firstName, name_regex) && validate(patronymic, name_regex) && validate(lastName, name_regex) &&
+            validate(email, email_regex) && validate(password, password_regex)) {
+            console.log("validation passed");
+            let data = {
+                first_name: firstName.value,
+                patronymic: patronymic.value,
+                last_name: lastName.value,
+                email: email.value,
+                role: document.getElementById('role').value,
+                password: password.value,
+                tg_id: tg_id
+            };
+            
+            const response = await fetch(`${BACKEND_URL}/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: "include",
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setCookie("Token", data.token);
+                setCookie("user", JSON.stringify(data.user));
+                window.location.replace("/profile");
+            } else {
+                const errorData = await response.json();
+                document.getElementById('registration-form').reset();
+                showError(`Ошибка: ${errorData.message || "Что-то пошло не так"}`);
+            }
+
+        }
+    })
+</script>
 
 
 </body>

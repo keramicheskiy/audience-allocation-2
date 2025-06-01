@@ -1,52 +1,52 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Профиль{% endblock %}
 
 {% block meta %}
-    <link rel="stylesheet" href="/home/css/profile.css">
+    <link rel="stylesheet" href="{% static "home/css/profile.css" %}">
 {% endblock %}
 
 {% block content %}
     <div class="profile-container">
-        <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
-        <div id="message-popup" class="message-popup">Уведомление</div>
 
         <h1>Профиль пользователя</h1>
 
         <div class="profile-info">
             <div class="profile-info">
                 <label for="first_name">Имя:</label>
-                <p id="first_name" class="info-element">...</p>
-                <input type="text" id="first_name_input" name="first_name" class="edit-input" hidden>
+                <input type="text" id="first_name" name="first_name" class="edit-input" hidden>
 
                 <label for="patronymic">Отчество:</label>
-                <p id="patronymic" class="info-element">...</p>
-                <input type="text" id="patronymic_input" name="patronymic" class="edit-input" hidden>
+                <input type="text" id="patronymic" name="patronymic" class="edit-input" hidden>
 
                 <label for="last_name">Фамилия:</label>
-                <p id="last_name" class="info-element">...</p>
-                <input type="text" id="last_name_input" name="last_name" class="edit-input" hidden>
+                <input type="text" id="last_name" name="last_name" class="edit-input" hidden>
 
                 <label for="email">Почта:</label>
-                <p id="email">...</p>
+                <p id="email" class="info-element">...</p>
 
                 <label for="role">Роль:</label>
-                <p id="role">...</p>
-                <select id="role_input" name="role" hidden required>
+                <select id="role" name="role" hidden required>
                     <option value="teacher">Преподаватель</option>
                     <option value="moderator">Модератор</option>
                     <option value="admin">Администратор</option>
                 </select>
 
+                <div class="profile-actions">
+                    <button id="save-button" class="btn" hidden>Сохранить изменения</button>
 
-                <div class="limitations" id="limitations">
+                    <button id="delete-button" class="btn" hidden>Удалить пользователя</button>
+                </div>
 
+                <div class="limitations" id="limitations" hidden>
                     <label for="hours-amount">Максимальное количество часов брони: </label>
-                    <p id="hours-amount_regex_error" class="info-element">Только положительное значение!</p>
-                    <input type="number" id="hours-amount" name="first_name" class="edit-input">
+                    <p id="hours-amount_regex_error" class="info-element" hidden>Только положительные значения!</p>
+                    <input type="number" id="hours-amount" class="edit-input">
                     <label for="auditoriums-amount">Максимальное количество лекций для брони: </label>
-                    <p id="auditoriums-amount_regex_error" class="info-element">Только положительное значение!</p>
-                    <input type="number" id="auditoriums-amount" name="first_name" class="edit-input">
+                    <p id="auditoriums-amount_regex_error" class="info-element" hidden>Только положительные
+                        значения!</p>
+                    <input type="number" id="auditoriums-amount" class="edit-input">
 
                     <button id="save-limitations-button" class="btn">Сохранить лимиты</button>
                 </div>
@@ -58,32 +58,27 @@
                     <button id="approve-role-button" class="btn" hidden>Подтвердить роль</button>
                 </div>
 
-                <div id="allowing-auditoriums">
-                    <select id="" name="role" hidden required></select>
+                <div id="allowing-auditoriums" hidden>
+                    <label for="auditorium-choice">Новая аудитория: </label>
+                    <select id="auditorium-choice" name="role" hidden required></select>
+
+                    <button id="allow-auditorium-button" class="btn">Добавить аудиторию</button>
+                    <button id="reset-auditoriums-button" class="btn">Сбросить аудитории</button>
 
                     <div id="allowed-auditoriums-block">
-                        <div class="allowed-auditorium-list" id="allowedAuditoriumList">
+                        <div class="allowed-auditorium-list" id="allowed-auditorium-list">
                             Загрузка...
                         </div>
                     </div>
-
-                    <button id="allowAuditoriumButton">Добавить аудиторию</button>
-                    <button id="resetAuditoriumsButton">Сбросить аудитории</button>
                 </div>
 
-            </div>
-
-            <div class="profile-actions">
-                <button id="edit-button" class="btn" hidden>Редактировать профиль</button>
-                <button id="save-button" class="btn" hidden>Сохранить изменения</button>
-
-                <button id="delete-button" class="btn" hidden>Удалить пользователя</button>
             </div>
         </div>
     </div>
 
-    <script src="/js/utils.js"></script>
-    <script src="/js/validation.js"></script>
+    <script src="{% static "js/validation.js" %}"></script>
+    <script src="{% static "js/utils.js" %}"></script>
+
     <script>
 
         const user_id = {{ user_id }};
@@ -102,16 +97,16 @@
         const lastNameInput = document.getElementById("last_name_input");
         const roleInput = document.getElementById("role_input");
 
-        const editButton = document.getElementById("edit-button");
         const saveEditButton = document.getElementById("save-button");
         const deleteButton = document.getElementById("delete-button");
         const saveLimitationsButton = document.getElementById("save-limitations-button");
-        const resetAuditoriumsButton = document.getElementById("resetAuditoriumsButton");
         const approveRoleButton = document.getElementById("approve-role-button");
         const wannabeRole = document.getElementById("wannabe_role");
 
         const limitations = document.getElementById("limitations");
         const allowingAuditoriums = document.getElementById("allowing-auditoriums");
+        const allowAuditoriumButton = document.getElementById("allow-auditorium-button");
+        const resetAuditoriumsButton = document.getElementById("reset-auditoriums-button");
 
 
         saveLimitationsButton.addEventListener("click", async () => {
@@ -123,40 +118,59 @@
             await loadAuditoriums();
         });
 
+        allowAuditoriumButton.addEventListener("click", async () => {
+            await allowAuditorium();
+            await loadAuditoriums();
+        });
+
         saveLimitationsButton.addEventListener("click", () => {
             document.getElementById("hours-amount_regex_error").hidden = hoursAmount.value >= 0;
             document.getElementById("auditoriums-amount_regex_error").hidden = auditoriumsAmount.value >= 0;
             if (hoursAmount.value >= 0 && auditoriumsAmount.value >= 0) {
-                fetch(BACKEND_URL + `/users/${user_id}/limit/hours`, {
-                    method: "PATCH",
-                    credentials: "include",
-                    body: JSON.stringify({
-                        amount: hoursAmount.value,
-                    })
-                });
-                fetch(BACKEND_URL + `/users/${user_id}/limit/auditoriums`, {
-                    method: "PATCH",
-                    credentials: "include",
-                    body: JSON.stringify({
-                        amount: auditoriumsAmount.value,
-                    })
-                });
+                if (hoursAmount.value) {
+                    fetch(BACKEND_URL + `/users/${user_id}/limit/hours`, {
+                        method: "PATCH",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: "include",
+                        body: JSON.stringify({
+                            amount: hoursAmount.value,
+                        })
+                    });
+                }
+                if (auditoriumsAmount.value) {
+                    fetch(BACKEND_URL + `/users/${user_id}/limit/auditoriums`, {
+                        method: "PATCH",
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            amount: auditoriumsAmount.value,
+                        })
+                    });
+                }
+                showMessage("Данные обновлены.");
             }
         })
 
         document.addEventListener("DOMContentLoaded", async () => {
-            const me = await fetchJSON(`${BACKEND_URL}/my/profile`);
-            const user = await fetchJSON(`${BACKEND_URL}/users/${user_id}`);
+            const me = (await fetchJSON(`${BACKEND_URL}/my/profile`)).user;
+            const user = (await fetchJSON(`${BACKEND_URL}/users/${user_id}`)).user;
 
             loadUserData(user);
 
-            if (me.id === user_id) {
-                editButton.hidden = false;
-            } else if (isModerator(me.role)) {
+            deleteButton.hidden = me.id === user_id;
+            saveEditButton.hidden = me.id !== user_id;
+            document.getElementById("role_approvance_requests").hidden = me.id === user_id;
+
+            if (isModerator(me.role)) {
 
                 limitations.hidden = false;
-                // РАЗРЕШИТЬ ПОЛЬЗОВАТЕЛЮ АУДИТОРИЮ, УДАЛИТЬ И РЕСЕТНУТЬ
+
                 allowingAuditoriums.hidden = false;
+                await loadAuditoriums();
 
                 if (isAdmin(me.role)) {
                     deleteButton.hidden = false;
@@ -167,23 +181,14 @@
                     });
 
                     if (wannabeResponse.ok) {
-                        const wannabe = await wannabeResponse.json();
-                        document.getElementById("role_approvance_requests").hidden = false;
+                        const wannabe = (await wannabeResponse.json()).role;
                         wannabeRole.textContent = wannabe.role;
                     }
+                    document.getElementById("role_approvance_requests").hidden = !wannabeResponse.ok;
                 }
             }
         });
 
-
-        editButton.addEventListener("click", async () => {
-            toggleEditMode(true);
-            const user = await fetchJSON(`${BACKEND_URL}/users/${user_id}`, {
-                method: "GET",
-                credentials: "include"
-            });
-            loadUserInputs(user);
-        });
 
         saveEditButton.addEventListener("click", async () => {
             await saveEditedUser();
@@ -198,7 +203,6 @@
                 method: "DELETE",
                 credentials: "include",
             });
-
             if (response.ok) {
                 window.location.replace("/users");
             } else {
@@ -206,43 +210,23 @@
             }
         });
 
-        function isModerator(role) {
-            return ["moderator", "admin"].includes(role);
-        }
-
-        function isAdmin(role) {
-            return role === "admin";
-        }
-
-        function toggleEditMode(isEdit) {
-            document.querySelectorAll(".info-element").forEach(el => el.hidden = isEdit);
-            document.querySelectorAll(".edit-input").forEach(el => el.hidden = !isEdit);
-            editButton.hidden = isEdit;
-            saveEditButton.hidden = !isEdit;
-        }
 
         function loadUserData(user) {
-            firstName.textContent = user.first_name;
-            patronymic.textContent = user.patronymic;
-            lastName.textContent = user.last_name;
+            firstName.value = user.first_name;
+            patronymic.value = user.patronymic;
+            lastName.value = user.last_name;
             email.textContent = user.email;
-            role.textContent = user.role;
-            role.style.color = ROLES_COLORS[user.role];
-        }
-
-        function loadUserInputs(user) {
-            firstNameInput.value = user.first_name;
-            patronymicInput.value = user.patronymic;
-            lastNameInput.value = user.last_name;
-            roleInput.value = user.role;
+            role.value = user.role;
+            document.getElementById("hours-amount").value = user.hours_limit;
+            document.getElementById("auditoriums-amount").value = user.booking_limit;
         }
 
         async function saveEditedUser() {
             const newUser = {
-                first_name: firstNameInput.value,
-                patronymic: patronymicInput.value,
-                last_name: lastNameInput.value,
-                role: roleInput.value
+                first_name: firstName.value,
+                patronymic: patronymic.value,
+                last_name: lastName.value,
+                role: role.value
             };
 
             const response = await fetch(`${BACKEND_URL}/users/${user_id}`, {
@@ -253,9 +237,8 @@
             });
 
             if (response.ok) {
-                const updated = await response.json();
-                loadUserData(updated);
-                toggleEditMode(false);
+                const updated_user = (await response.json()).user;
+                loadUserData(updated_user);
                 showMessage("Профиль успешно обновлён");
             } else {
                 showError("Ошибка при обновлении профиля");
@@ -270,13 +253,16 @@
         async function approve_role() {
             let response = await fetch(BACKEND_URL + "/users/${user_id}/role", {
                 method: "PATCH",
-                credentials: "include",
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     role: ROLES_CHOICES[wannabeRole.value],
                 })
             });
             if (response.ok) {
-                await loadUser();
+                await loadUserData();
             } else {
                 showError("Ошибка при подтверждении роли");
             }
@@ -284,43 +270,57 @@
 
         async function loadAuditoriums() {
             const selectElement = document.getElementById("auditorium-choice");
-            const listElement = document.getElementById("allowedAuditoriumList");
+            const listElement = document.getElementById("allowed-auditorium-list");
 
-            const response = await fetch(`${BACKEND_URL}/users/${user_id}/auditoriums`, {
-                method: "GET",
-                credentials: "include"
-            });
-            if (!response.ok) showError("Ошибка загрузки аудиторий");
-
-            const data = await response.json();
             selectElement.innerHTML = "";
             listElement.innerHTML = "";
 
-            if (data.length === 0) {
-                listElement.textContent = "Нет доступных аудиторий.";
-                return;
-            }
+            try {
+                let response = await fetch(`${BACKEND_URL}/users/${user_id}/auditoriums`, {
+                    method: "GET",
+                    credentials: "include"
+                });
+                if (!response.ok) throw new Error("Ошибка загрузки разрешенных аудиторий");
+                const allowed_auditoriums = (await response.json()).auditoriums || [];
 
-            data.forEach(auditorium => {
-                const option = document.createElement("option");
-                option.value = auditorium.id;
-                option.textContent = auditorium.name;
-                selectElement.appendChild(option);
+                response = await fetch(`${BACKEND_URL}/auditoriums`, {
+                    method: "GET",
+                    credentials: "include"
+                });
+                if (!response.ok) showError("Ошибка загрузки аудиторий");
+                const auditoriums = (await response.json()).auditoriums || [];
 
-                const div = document.createElement("div");
-                div.textContent = auditorium.name + " ";
+                if (allowed_auditoriums.length === 0) {
+                    listElement.textContent = "Нет разрешенных аудиторий.";
+                }
 
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Удалить";
-                deleteButton.addEventListener("click", async () => {
-                    await deleteAuditorium(auditorium.id);
+                auditoriums.forEach(auditorium => {
+                    const option = document.createElement("option");
+                    option.value = auditorium.id;
+                    option.textContent = `${auditorium.number}`;
+                    selectElement.appendChild(option);
                 });
 
-                div.appendChild(deleteButton);
-                listElement.appendChild(div);
-            });
+                allowed_auditoriums.forEach(auditorium => {
+                    const div = document.createElement("div");
+                    div.textContent = auditorium.name + " ";
 
-            selectElement.hidden = false;
+                    const deleteButton = document.createElement("button");
+                    deleteButton.textContent = "Удалить";
+                    deleteButton.addEventListener("click", async () => {
+                        await deleteAuditorium(auditorium.id);
+                        await loadAuditoriums();
+                    });
+
+                    div.appendChild(deleteButton);
+                    listElement.appendChild(div);
+                });
+
+                selectElement.hidden = false;
+
+            } catch (error) {
+                showError(error.message);
+            }
         }
 
         async function deleteAuditorium(auditoriumId) {
@@ -329,8 +329,6 @@
                 credentials: "include"
             });
             if (!response.ok) showError("Не удалось удалить аудиторию");
-
-            await loadAuditoriums();
         }
 
         async function resetAuditoriums() {
@@ -340,6 +338,21 @@
             });
             if (response.ok) showMessage("Все аудитории сброшены");
         }
+
+
+        async function allowAuditorium() {
+            const response = await fetch(`${BACKEND_URL}/users/${user_id}/auditoriums`, {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                credentials: "include",
+                body: JSON.stringify({
+                    auditorium_id: document.getElementById("auditorium-choice").value
+                })
+            });
+            if (response.ok) showMessage("Аудитория была добавлена в разрешенные.");
+            else showError("Ошибка")
+        }
+
 
     </script>
 

@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Вход</title>
-    <link rel="stylesheet" href="/authentication/css/auth.css">
+    <link rel="stylesheet" href="{% static 'authentication/css/auth.css' %}">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 <div class="form-container">
-    <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
-    <div id="message-popup" class="message-popup">Уведомление</div>
+    <div id="error-popup" class="error-popup" hidden>Ошибка! Что-то пошло не так.</div>
+    <div id="message-popup" class="message-popup" hidden>Уведомление</div>
 
     <h2>Вход</h2>
     <form id="login-form" method="post">
@@ -36,9 +36,59 @@
     <p class="footer-text">Нет аккаунта? <a href="/auth/register">Зарегистрироваться</a></p>
 </div>
 
-<script src="/static/js/utils.js"></script>
-<script src="/static/js/validation.js"></script>
-<script src="/authentication/js/login.js"></script>
+<script src="{% static 'js/utils.js' %}"></script>
+<script src="{% static 'js/validation.js' %}"></script>
+
+<script>
+
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+
+    const loginButton = document.getElementById('login-button');
+
+    let tg_id = null;
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+            tg_id = tg.initDataUnsafe.user.id;
+        }
+    }
+
+    loginButton.addEventListener('click', async () => {
+
+        if (validate(email, email_regex) && validate(password, password_regex)) {
+            console.log("validation passed");
+            let data = {
+                email: email.value,
+                password: password.value,
+                tg_id: tg_id
+            };
+            const response = await fetch(`${BACKEND_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: "include",
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                const data = await response.json();
+                const user = data.user;
+                setCookie("Token", data.token);
+                window.location.replace(`/users/${user.id}`);
+            } else {
+                const errorData = await response.json();
+                document.getElementById('login-form').reset();
+                showError(`Ошибка: ${errorData.message || "Что-то пошло не так"}`);
+            }
+        }
+    })
+
+
+</script>
+
 
 </body>
 </html>

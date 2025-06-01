@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 MODE = os.environ.get('MODE', 'local')
 
-config_file = os.environ.get('CONFIG_FILE')
+config_file = BASE_DIR.parent / os.environ.get('CONFIG_FILE', 'config.yaml')
 
 with open(config_file, 'r') as file:
     config = yaml.safe_load(file)
@@ -19,7 +19,8 @@ env = config[MODE][BASE_DIR.name]
 SECRET_KEY = env["django"].get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(env["django"].get('DEBUG')))
+# DEBUG = bool(int(env["django"].get('DEBUG')))
+DEBUG = True
 ALLOWED_HOSTS = env["django"].get("ALLOWED_HOSTS").split(" ")
 
 # Application definition
@@ -47,9 +48,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-if DEBUG:
-    MIDDLEWARE.insert(0, 'whitenoise.middleware.WhiteNoiseMiddleware')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# if DEBUG:
+#     INSTALLED_APPS += ['whitenoise']
+#     MIDDLEWARE.insert(0, 'whitenoise.middleware.WhiteNoiseMiddleware')
+#     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ROOT_URLCONF = 'frontend.urls'
 
@@ -106,7 +108,11 @@ USE_TZ = True
 # STATIC_ROOT = BASE_DIR / 'static' / 'audience-allocation'
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # куда collectstatic собирает файлы
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',  # путь к папке с дополнительными статическими файлами
+]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

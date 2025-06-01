@@ -21,8 +21,9 @@
 /users/<user_id>/wannabe - Получить запрошенную роль, если она есть (GET).
 /users/<user_id>/lectures - Получить лекции преподавателя (GET).
 /users/<user_id>/lectures/<lecture_id> - Удалить лекцию преподавателя (DELETE).
-/users/<user_id>/auditoriums/<auditorium_id> - Разрешить (POST) или запретить аудиторию преподавателю (DELETE).
-{"auditorium_id": ""}
+/users/<user_id>/auditoriums> - 
+Получить все (GET), разрешить (POST) или запретить аудиторию преподавателю (DELETE).
+{"auditorium_id": 1}
 /users/<user_id>/auditoriums - Получить все аудитории (GET).
 /users/<user_id>/auditoriums/reset - Запретить все аудитории преподавателю (DELETE).
 /users/<user_id>/limit/hours - Ограничить максимальное количество часов брони (PATCH).
@@ -39,7 +40,7 @@
 
 ### Управление аудиториями.
 
-/auditoriums?date=2025-12-31&start=10:45&end=12:15 - Получить все свободные разрешенные 
+/auditoriums?date=2025-12-31&start=10:45&end=12:15 - Получить все свободные разрешенные
 (если указаны ключи date, start, end) аудитории для пользователя (GET).
 /auditoriums/<auditorium_id> - Получить аудиторию, если она свободна и разрешена (GET).
 /auditoriums/new - Создать аудиторию (POST).

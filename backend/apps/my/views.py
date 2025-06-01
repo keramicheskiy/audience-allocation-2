@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -14,7 +15,7 @@ from apps.lectures.serializers import LectureSerializer
 @role_required("teacher")
 def get_own_lectures(request):
     user = utils.get_user_from_request(request)
-    lectures = Lecture.objects.filter(email=user.email).order_by('date', 'start').all()
+    lectures = Lecture.objects.filter(user=user).order_by('start').all()
     return Response({"lectures": LectureSerializer(lectures, many=True).data}, status=status.HTTP_200_OK)
 
 

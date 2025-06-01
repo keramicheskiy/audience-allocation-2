@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Ваши лекции{% endblock %}
 
 {% block meta %}
-    <link rel="stylesheet" href="/home/css/listlike.css">
+    <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
 {% endblock %}
 
 {% block content %}
@@ -10,8 +11,6 @@
     <h1>Забронировать аудиторию</h1>
 
     <div class="add-lecture">
-        <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
-        <div id="message-popup" class="message-popup">Уведомление</div>
 
         <form id="lecture-form" method="post">
             {% csrf_token %}
@@ -95,7 +94,7 @@
         </div>
     </div>
 
-    <script src="/js/utils.js"></script>
+    <script src="{% static "js/utils.js" %}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', fetchLectures);
@@ -110,7 +109,10 @@
                 showError("Заполните дату, начало и конец лекции.");
                 return;
             }
-            const res = await fetch(`${BACKEND_URL}/auditoriums?date=${date}&start=${start}&end=${end}`);
+            const res = await fetch(`${BACKEND_URL}/auditoriums?date=${date}&start=${start}&end=${end}`, {
+                method: "GET",
+                credentials: "include",
+            });
             const auditoriums = await res.json();
 
             const select = document.getElementById("auditorium");
@@ -165,7 +167,8 @@
 
         async function deleteLecture(id) {
             await fetch(`${BACKEND_URL}/lectures/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: "include",
             });
             await fetchLectures();
         }
@@ -205,6 +208,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: "include",
                 body: JSON.stringify({
                     date: date,
                     start: start,

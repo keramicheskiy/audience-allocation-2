@@ -17,6 +17,10 @@ with open(config_file, 'r') as file:
 env = config[MODE][BASE_DIR.name]
 db = config["db"][env["storage"]["type"]]
 
+ADMIN_EMAIL = config['admin'].get('EMAIL')
+ADMIN_PASSWORD = config['admin'].get('PASSWORD')
+ADMIN_TG_ID = config['admin'].get('TG_ID')
+
 SECRET_KEY = env["django"].get('SECRET_KEY')
 
 DEBUG = bool(int(env["django"].get('DEBUG')))
@@ -41,10 +45,12 @@ INSTALLED_APPS = [
     'apps.my',
     'apps.role_approvance_requests',
     'apps.users',
+    'apps.initialization',
 
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -52,8 +58,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -99,16 +103,16 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.authentication.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.authentication.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.authentication.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.authentication.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -140,11 +144,15 @@ smtp_server = env["email"].get('SERVER')
 smtp_port = env["email"].get('PORT')
 
 # Corsheaders
-CORS_ALLOWED_ORIGINS = [
-    "http://frontend:8000",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://frontend:8000",
+#     "http://audience-allocation-frontend:8000",
+#     "http://localhost:8000",
+#     "http://127.0.0.1:8000",
+# ]
+CORS_ALLOW_ALL_ORIGINS = True  # 🔥 для разработки. В проде укажи явно CORS_ALLOWED_ORIGINS
+CORS_ALLOW_CREDENTIALS = True
+
 
 ROLES_CHOICES = (
     ('admin', 'Администратор'),

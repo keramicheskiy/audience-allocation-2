@@ -1,16 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Все лекции{% endblock %}
 
 {% block meta %}
-    <link rel="stylesheet" href="/home/css/listlike.css">
+    <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
 {% endblock %}
 
 {% block content %}
 
     <h1>Все лекции</h1>
-
-    <div id="error-popup" class="error-popup">Ошибка! Что-то пошло не так.</div>
-    <div id="message-popup" class="message-popup">Уведомление</div>
 
     <div id="lecturesBlock">
         <label>Показывать только предстоящие лекции</label>
@@ -24,8 +22,8 @@
         </div>
     </div>
 
-    <script src="/js/utils.js"></script>
-    <script src="/js/validation.js"></script>
+    <script src="{% static "js/utils.js" %}"></script>
+    <script src="{% static "js/validation.js" %}"></script>
 
     <script>
         let lecturesModeCheckbox = document.getElementById("lecturesModeCheckbox");

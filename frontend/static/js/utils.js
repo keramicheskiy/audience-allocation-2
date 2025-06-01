@@ -1,4 +1,5 @@
-const BACKEND_URL = "http://backend:8080";
+const BACKEND_URL = "http://localhost:8080";
+
 
 const ROLES_CHOICES = {
     "teacher": "Преподаватель",
@@ -10,7 +11,7 @@ const ROLES_CHOICES = {
 };
 
 const ROLES_COLORS = {
-    "teacher": "yellow",
+    "teacher": "green",
     "moderator": "blue",
     "admin": "red"
 };
@@ -65,10 +66,19 @@ function deleteCookie(name) {
 }
 
 function initTelegramWebApp() {
-  if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.ready();
-  }
+    if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.ready();
+    }
 }
+
+function isModerator(role) {
+    return ["moderator", "admin"].includes(role);
+}
+
+function isAdmin(role) {
+    return role === "admin";
+}
+
 
 
 

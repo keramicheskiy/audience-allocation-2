@@ -1,20 +1,23 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Главная</title>
+    <title>Главная — Система бронирования аудиторий</title>
+    <link rel="stylesheet" href="{% static 'home/css/main.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-<div class="center-box">
-    <h1>Добро пожаловать в систему бронирования аудиторий!</h1>
-    <p>Вы можете войти или зарегистрироваться, чтобы начать работу.</p>
-    <hr>
-    <a href="/auth/login" class="btn">Войти</a>
-    <a href="/auth/register" class="btn">Зарегистрироваться</a>
+<div class="container">
+    <h1>Добро пожаловать!</h1>
+    <p>Система бронирования аудиторий МАИ. Войдите или зарегистрируйтесь, чтобы продолжить.</p>
+    <div class="button-group">
+        <a href="/auth/login" class="btn">Войти</a>
+        <a href="/auth/register" class="btn btn-outline">Зарегистрироваться</a>
+    </div>
 </div>
 
-<script src="/static/js/utils.js"></script>
-
+<script src="{% static 'js/utils.js' %}"></script>
 </body>
 </html>

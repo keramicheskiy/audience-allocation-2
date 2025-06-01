@@ -1,0 +1,135 @@
+/* Общий контейнер */
+.card {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Заголовок */
+.card h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    color: #333;
+}
+
+/* Группы форм и информации */
+.form-group label {
+    display: block;
+    margin-top: 15px;
+    font-weight: 600;
+    color: #444;
+}
+
+.info-box {
+    padding: 8px 12px;
+    background-color: #f7f7f7;
+    border-radius: 6px;
+    margin-top: 5px;
+    border: 1px solid #e0e0e0;
+}
+
+.input-field, select {
+    display: block;
+    width: 100%;
+    margin-top: 5px;
+    padding: 8px 12px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #fafafa;
+    transition: border-color 0.3s ease;
+}
+
+.input-field:focus, select:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
+
+/* Ошибки */
+.error-message {
+    color: red;
+    margin-top: 5px;
+}
+
+/* Кнопки */
+.btn {
+    margin-top: 20px;
+    padding: 10px 18px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+    background-color: #357abd;
+}
+
+.btn-group .btn {
+    margin-top: 15px;
+    margin-right: 10px;
+}
+
+/* Контейнер действий */
+.action-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+/* Разделы */
+.section {
+    margin-top: 30px;
+    padding: 20px;
+    border: 1px dashed #ccc;
+    border-radius: 12px;
+    background-color: #fdfdfd;
+}
+
+/* Списки */
+.item-list {
+    margin-top: 10px;
+    background-color: #f1f1f1;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.95rem;
+}
+
+/* Сообщения */
+.message {
+    margin-top: 10px;
+    font-style: italic;
+    color: #555;
+}
+
+/* Медиа-запрос для адаптива */
+@media (max-width: 600px) {
+    .card {
+        padding: 20px;
+    }
+
+    .action-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+.button-group {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+}

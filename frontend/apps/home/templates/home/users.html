@@ -5,100 +5,91 @@
 
 {% block meta %}
     <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
+    <link rel="stylesheet" href="{% static "home/css/block.css" %}">
 {% endblock %}
 
-
 {% block content %}
+    <div class="equipment-page">
+        <div class="container">
+            <h1>Пользователи</h1>
 
-    <h1>Запросы на получение роли</h1>
+            <div id="usersBlock">
+                <div class="user-list" id="user-list">
+                    Загрузка...
+                </div>
+            </div>
 
-
-    <div id="requestsBlock">
-        <div class="request-list" id="requestList">
-            Загрузка...
+            <div id="messageBox" class="message"></div>
         </div>
     </div>
 
     <script src="{% static "js/utils.js" %}"></script>
-
     <script>
         document.addEventListener("DOMContentLoaded", async function () {
-            await fetchRequests();
+            await fetchUsers();
         });
 
-        async function fetchRequests() {
-            const response = await fetch(BACKEND_URL + "/requests", {
+        async function fetchUsers() {
+            const response = await fetch(BACKEND_URL + "/users", {
                 method: "GET",
                 credentials: "include"
             });
-            let requests = await response.json();
-            const container = document.getElementById('requestList');
-            container.innerHTML = '';
-
-            if (requests.length === 0) {
-                container.innerHTML = '<p>Запросов пока нет.</p>';
+            if (!response.ok) {
+                showError("Ошибка загрузки пользователей!");
                 return;
             }
 
-            requests.forEach(request => {
+            let users = (await response.json()).users;
+            const container = document.getElementById('user-list');
+            container.innerHTML = '';
+
+            if (users.length === 0) {
+                container.innerHTML = '<p>Пользователей пока нет.</p>';
+                return;
+            }
+
+            users.forEach(user => {
                 const item = document.createElement('div');
-                item.className = 'request-item';
+                item.className = 'block-item';
 
-                const name = document.createElement('span');
-                name.textContent = `${request.user.first_name} ${request.user.patronymic} ${request.user.last_name}`;
+                const left = document.createElement('div');
+                left.className = 'item-left';
+                left.textContent = `${user.first_name} ${user.patronymic} ${user.last_name}`;
+                left.onclick = () => {
+                    window.location.replace(`users/${user.id}`);
+                };
 
-                const role = document.createElement('span');
-                role.textContent = ROLES_CHOICES[request.wannabe_role];
-                role.style.color = ROLES_COLORS[request.wannabe_role];
+                const center = document.createElement('div');
+                center.className = 'item-center';
+                center.textContent = ROLES_CHOICES[user.role];
+                center.style.color = ROLES_COLORS[user.role];
 
-                const approveBtn = document.createElement('button');
-                approveBtn.textContent = 'Подтвердить';
-                approveBtn.onclick = () => approveRequest(request);
+                const right = document.createElement('div');
+                right.className = 'item-right';
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Удалить';
-                deleteBtn.onclick = () => deleteRequest(request);
+                deleteBtn.onclick = () => deleteUser(user);
 
-                item.appendChild(name);
-                item.appendChild(role);
-                item.appendChild(approveBtn);
-                item.appendChild(deleteBtn);
+                right.appendChild(deleteBtn);
+
+                item.appendChild(left);
+                item.appendChild(center);
+                item.appendChild(right);
                 container.appendChild(item);
             });
-
         }
 
-        async function approveRequest(request) {
-            let response = await fetch(`${BACKEND_URL}/requests/${request.id}`, {
-                method: 'PATCH',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-            });
-            if (response.ok) {
-                showMessage("Заявка одобрена");
-                await fetchRequests();
-            } else {
-                showError("Ошибка");
-            }
-        }
-
-        async function deleteRequest(request) {
-            let response = await fetch(`${BACKEND_URL}/requests/${request.id}`, {
+        async function deleteUser(user) {
+            let response = await fetch(`${BACKEND_URL}/users/${user.id}/delete`, {
                 method: 'DELETE', credentials: 'include'
             });
             if (response.ok) {
-                showMessage("Заявка отклонена");
-                await fetchRequests();
+                showMessage("Пользователь удалён.");
+                await fetchUsers();
             } else {
-                showError("Ошибка");
+                showError("Ошибка при удалении пользователя.");
             }
         }
-
-
     </script>
-
-
 {% endblock %}
-

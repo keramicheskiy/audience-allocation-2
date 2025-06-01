@@ -297,13 +297,13 @@
                 auditoriums.forEach(auditorium => {
                     const option = document.createElement("option");
                     option.value = auditorium.id;
-                    option.textContent = `${auditorium.number}`;
+                    option.textContent = auditorium["number"];
                     selectElement.appendChild(option);
                 });
 
                 allowed_auditoriums.forEach(auditorium => {
                     const div = document.createElement("div");
-                    div.textContent = auditorium.name + " ";
+                    div.textContent = auditorium["number"] + " ";
 
                     const deleteButton = document.createElement("button");
                     deleteButton.textContent = "Удалить";
@@ -329,6 +329,7 @@
                 credentials: "include"
             });
             if (!response.ok) showError("Не удалось удалить аудиторию");
+            else showMessage("Аудитория удалена.");
         }
 
         async function resetAuditoriums() {
@@ -337,6 +338,7 @@
                 credentials: "include"
             });
             if (response.ok) showMessage("Все аудитории сброшены");
+            else showError("Ошибка");
         }
 
 

@@ -31,16 +31,16 @@
                 method: "GET",
                 credentials: "include"
             });
-            let requests = await response.json();
+            let reqs = (await response.json()).requests;
             const container = document.getElementById('requestList');
             container.innerHTML = '';
 
-            if (requests.length === 0) {
+            if (reqs.length === 0) {
                 container.innerHTML = '<p>Запросов пока нет.</p>';
                 return;
             }
 
-            requests.forEach(request => {
+            reqs.forEach(request => {
                 const item = document.createElement('div');
                 item.className = 'request-item';
 

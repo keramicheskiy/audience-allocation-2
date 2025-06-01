@@ -5,35 +5,36 @@
 
 {% block meta %}
     <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
-    <link rel="stylesheet" href="{% static "home/css/equipment.css" %}">
+    <link rel="stylesheet" href="{% static "home/css/block.css" %}">
 {% endblock %}
 
 
 {% block content %}
-    <body>
 
+    <body>
     <div class="equipment-page">
-        <div class="container">
+        <div class="card">
             <h1>Оборудование</h1>
 
-            <div>
-                <label for="inputName">Название оборудования</label>
-                <input type="text" id="inputName" name="name" placeholder="Введите название" autocomplete="off"
-                       minlength="3"/>
+            <div class="form-group">
+                <label for="name">Название оборудования</label>
+                <input type="text" id="name" name="name" class="input-field" placeholder="Введите название"
+                       autocomplete="off" minlength="3"/>
                 <div id="nameError" class="error-message">Название должно быть уникальным и минимум 3 символа.</div>
 
-                <button id="btnCreateEquipment" disabled>Добавить оборудование</button>
+                <button id="btnCreateEquipment" class="btn" onclick="createEquipment()">Добавить оборудование</button>
+
             </div>
 
-            <div id="equipmentList">
+            <div id="equipmentList" class="item-list">
                 <p>Загрузка...</p>
             </div>
 
             <div id="messageBox" class="message"></div>
         </div>
     </div>
-
     </body>
+
 
 
     <script src="{% static "js/utils.js" %}"></script>
@@ -66,11 +67,15 @@
 
                     const delBtn = document.createElement('button');
                     delBtn.textContent = 'Удалить';
+                    let div = document.createElement('div');
+                    div.appendChild(delBtn)
+                    div.classList.add('button-group');
                     delBtn.onclick = () => deleteEquipment(equipment);
 
                     item.appendChild(name);
-                    item.appendChild(delBtn);
+                    item.appendChild(div);
                     container.appendChild(item);
+                    container.appendChild(document.createElement('br'));
                 });
             }
         }

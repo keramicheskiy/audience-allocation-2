@@ -73,14 +73,14 @@
             <br><br>
 
             <input type="reset" value="Сбросить">
-            <input type="button" onclick="createLecture()" value="Создать">
+            <input type="button" class="btn" onclick="createLecture()" value="Создать">
         </form>
     </div>
 
 
     <h1>Ваши лекции</h1>
 
-    <div id="lecturesBlock">
+    <div id="lectures-block">
         <label>Показывать только предстоящие лекции</label>
         <label class="switch">
             <input id="lecturesModeCheckbox" type="checkbox">
@@ -89,7 +89,7 @@
 
         <hr>
 
-        <div class="lecture-list" id="lectureList">
+        <div class="lecture-list" id="lecture-list">
             Загрузка...
         </div>
     </div>
@@ -105,18 +105,19 @@
             const start = document.getElementById("start-time").value;
             const end = document.getElementById("end-time").value;
 
-            if (!date || !start || !end) {
-                showError("Заполните дату, начало и конец лекции.");
-                return;
-            }
+            
             const res = await fetch(`${BACKEND_URL}/auditoriums?date=${date}&start=${start}&end=${end}`, {
                 method: "GET",
                 credentials: "include",
             });
-            const auditoriums = await res.json();
+            if (!res.ok) {
+                showError("Ошибка при получении свободных аудиторий.");
+                return;
+            }
+            const auditoriums = (await res.json()).auditoriums;
 
             const select = document.getElementById("auditorium");
-            select.innerHTML = '<option value="">Выберите доступную аудиторию</option>'; // Очистить
+            select.innerHTML = '<option value="">Выберите доступную аудиторию</option>';
 
             if (auditoriums.length === 0) {
                 const opt = document.createElement("option");
@@ -126,19 +127,26 @@
                 return;
             }
 
-            auditoriums.forEach(aud => {
+            auditoriums.forEach(auditorium => {
                 const opt = document.createElement("option");
-                opt.value = aud.number;
-                opt.text = `${aud.name} (вместимость: ${aud.size})`;
+                opt.value = auditorium["number"];
+                opt.text = `${auditorium.name} (вместимость: ${auditorium.size})`;
                 select.appendChild(opt);
             });
         }
 
         async function fetchLectures() {
             const isUpcoming = document.getElementById("lecturesModeCheckbox").checked;
-            const res = await fetch(BACKEND_URL + "/my/lectures" + (isUpcoming ? "/upcoming" : ""));
-            const lectures = await res.json();
-            const container = document.getElementById('lectureList');
+            const res = await fetch(BACKEND_URL + "/my/lectures" + (isUpcoming ? "/upcoming" : ""), {
+                method: "GET", 
+                credentials: "include"
+            });
+            if (!res.ok) {
+                showError("Ошибка при загрузке лекций.");
+                return;
+            }
+            const lectures = (await res.json()).lectures;
+            const container = document.getElementById('lecture-list');
             container.innerHTML = '';
 
             if (lectures.length === 0) {
@@ -201,7 +209,6 @@
                 showError("Заполните все поля, включая выбор аудитории.");
                 return;
             }
-
 
             const response = await fetch(`${BACKEND_URL}/auditoriums/${auditorium}/book`, {
                 method: 'POST',

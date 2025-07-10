@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-
+    
     <h1>Ваши лекции</h1>
 
     <div id="lecturesBlock">
@@ -16,7 +16,6 @@
             <input id="lecturesModeCheckbox" type="checkbox">
             <span class="slider round"></span>
         </label>
-        <hr>
         <div class="lecture-list" id="lectureList">
             Загрузка...
         </div>
@@ -36,12 +35,14 @@
 
 
         async function fetchLectures() {
+            showLoading();
             const isUpcoming = document.getElementById("lecturesModeCheckbox").checked;
 
             const res = await fetch(BACKEND_URL + "/my/lectures" + (isUpcoming ? "/upcoming" : ""), {
-                method: 'GET', credentials: 'include'
+                method: 'GET', credentials: 'include'   
             });
             if (!res.ok) {
+                hideLoading();
                 showError("Ошибка при загрузке лекций.");
                 return;
             }
@@ -50,6 +51,7 @@
             container.innerHTML = '';
 
             if (lectures.length === 0) {
+                hideLoading();
                 container.innerHTML = '<p>Лекций пока нет.</p>';
                 return;
             }
@@ -57,30 +59,62 @@
             lectures.forEach(lecture => {
                 const item = document.createElement('div');
                 item.className = 'lecture-item';
+                item.classList.add("horizontal-div");
 
-                const date = document.createElement('span');
-                date.textContent = `${lecture.user.first_name} ${lecture.user.patronymic} ${lecture.user.last_name}`;
                 const name = document.createElement('span');
-                name.textContent = `${lecture.date} ${lecture.start}-${lecture.end}`;
+                name.textContent = `${lecture.user.first_name} ${lecture.user.patronymic} ${lecture.user.last_name}`;
+                const start = document.createElement('span');
+                const end = document.createElement('span');
+                const auditorium = document.createElement('span');
+                const auditorium_building = document.createElement('span');
+                auditorium.textContent = `${lecture.auditorium.number}`;
+                auditorium_building.textContent = `${lecture.auditorium.building.name}`;
+                
+                const start_date = new Date(lecture.start);
+                const end_date = new Date(lecture.end);
+                const now = new Date();
 
-                if (isUpcoming) {
+                const padZero = num => num.toString().padStart(2, '0');
+
+                const str_date1 = `${padZero(start_date.getDate())}.${padZero(start_date.getMonth() + 1)}.${start_date.getFullYear()}`;
+                const str_date2 = `${padZero(end_date.getDate())}.${padZero(end_date.getMonth() + 1)}.${end_date.getFullYear()}`;
+                const str_start = `${padZero(start_date.getHours())}:${padZero(start_date.getMinutes())}`;
+                const str_end = `${padZero(end_date.getHours())}:${padZero(end_date.getMinutes())}`;
+
+                start.textContent = `Начало:  ${str_start} ${str_date1}`;
+                end.textContent = `Конец:  ${str_end} ${str_date2}`;
+
+                item.appendChild(auditorium);
+                item.appendChild(auditorium_building);
+                item.appendChild(start);
+                item.appendChild(end);
+                // item.appendChild(name);
+
+                if (end_date >= now) {
                     const delBtn = document.createElement('button');
                     delBtn.textContent = 'Удалить';
+                    delBtn.classList.add("delete-button");
                     delBtn.onclick = () => deleteLecture(lecture);
                     item.appendChild(delBtn);
                 }
 
-                item.appendChild(date);
-                item.appendChild(name);
                 container.appendChild(item);
             });
+            hideLoading();
         }
 
         async function deleteLecture(lecture) {
-            await fetch(`${BACKEND_URL}/${lecture.user}/lectures/${lecture.id}`, {
+            showLoading();
+            let response = await fetch(`${BACKEND_URL}/users/${lecture.user.id}/lectures/${lecture.id}`, {
                 method: 'DELETE', credentials: 'include'
             });
-            await fetchLectures();
+            hideLoading();
+            if (response.ok) {
+                showMessage("Лекция успешно удалена");
+                await fetchLectures();
+            } else {
+                showError(response.e);
+            }
         }
 
     </script>

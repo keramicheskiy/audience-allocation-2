@@ -5,22 +5,32 @@
 
 {% block meta %}
     <link rel="stylesheet" href="{% static "home/css/profile.css" %}">
+    <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
 {% endblock %}
 
 {% block content %}
-    <div class="profile-container">
+    <div id="error-popup" class="error-popup" hidden>Ошибка! Что-то пошло не так.</div>
+    <div id="message-popup" class="message-popup" hidden>Уведомление</div>
+    <div id="loading"></div>
 
+    <div class="profile-container">
         <h1>Профиль пользователя</h1>
 
         <div class="profile-info">
             <div class="profile-info">
                 <label for="first_name">Имя:</label>
+                <strong hidden id="first_name_length_error" class="error-message">Поле не может быть пустым.</strong>
+                <strong hidden id="first_name_error" class="error-message">Имя должно состоять только из кирилицы.</strong>
                 <input type="text" id="first_name" name="first_name" class="edit-input" hidden>
 
                 <label for="patronymic">Отчество:</label>
+                <strong hidden id="patronymic_length_error" class="error-message">Поле не может быть пустым.</strong>
+                <strong hidden id="patronymic_error" class="error-message">Отчество должно состоять только из кирилицы.</strong>
                 <input type="text" id="patronymic" name="patronymic" class="edit-input" hidden>
 
                 <label for="last_name">Фамилия:</label>
+                <strong hidden id="last_name_length_error" class="error-message">Поле не может быть пустым.</strong>
+                <strong hidden id="last_name_error" class="error-message">Фамилия должна состоять только из кирилицы.</strong>
                 <input type="text" id="last_name" name="last_name" class="edit-input" hidden>
 
                 <label for="email">Почта:</label>
@@ -41,10 +51,10 @@
 
                 <div class="limitations" id="limitations" hidden>
                     <label for="hours-amount">Максимальное количество часов брони: </label>
-                    <p id="hours-amount_regex_error" class="info-element" hidden>Только положительные значения!</p>
+                    <p id="hours-amount_error" class="info-element" hidden>Только положительные значения!</p>
                     <input type="number" id="hours-amount" class="edit-input">
                     <label for="auditoriums-amount">Максимальное количество лекций для брони: </label>
-                    <p id="auditoriums-amount_regex_error" class="info-element" hidden>Только положительные
+                    <p id="auditoriums-amount_error" class="info-element" hidden>Только положительные
                         значения!</p>
                     <input type="number" id="auditoriums-amount" class="edit-input">
 
@@ -52,18 +62,19 @@
                 </div>
 
 
-                <div id="role_approvance_requests">
-                    <p id="wannabe_role_message" hidden>Пользователь запросил смену роли на:</p>
-                    <p id="wannabe_role" hidden>Преподаватель</p>
-                    <button id="approve-role-button" class="btn" hidden>Подтвердить роль</button>
+                <div id="role_approvance_requests" hidden>
+                    <p id="wannabe_role_message">Пользователь запросил смену роли на:</p>
+                    <p id="wannabe_role">Преподаватель</p>
+                    <button id="approve-role-button" class="btn">Подтвердить роль</button>
                 </div>
+                
 
                 <div id="allowing-auditoriums" hidden>
-                    <label for="auditorium-choice">Новая аудитория: </label>
+                    <label for="auditorium-choice">Разрешить аудиторию: </label>
                     <select id="auditorium-choice" name="role" hidden required></select>
 
-                    <button id="allow-auditorium-button" class="btn">Добавить аудиторию</button>
-                    <button id="reset-auditoriums-button" class="btn">Сбросить аудитории</button>
+                    <button id="allow-auditorium-button" class="btn">Добавить</button>
+                    <button id="reset-auditoriums-button" class="btn">Сбросить</button>
 
                     <div id="allowed-auditoriums-block">
                         <div class="allowed-auditorium-list" id="allowed-auditorium-list">
@@ -81,11 +92,11 @@
 
     <script>
 
-        const user_id = {{ user_id }};
+        const user_id = {{ user_id }};  
 
-        const firstName = document.getElementById("first_name");
+        const first_name = document.getElementById("first_name");
         const patronymic = document.getElementById("patronymic");
-        const lastName = document.getElementById("last_name");
+        const last_name = document.getElementById("last_name");
         const email = document.getElementById("email");
         const role = document.getElementById("role");
 
@@ -124,8 +135,9 @@
         });
 
         saveLimitationsButton.addEventListener("click", () => {
-            document.getElementById("hours-amount_regex_error").hidden = hoursAmount.value >= 0;
-            document.getElementById("auditoriums-amount_regex_error").hidden = auditoriumsAmount.value >= 0;
+            showLoading();
+            document.getElementById("hours-amount_error").hidden = hoursAmount.value >= 0;
+            document.getElementById("auditoriums-amount_error").hidden = auditoriumsAmount.value >= 0;
             if (hoursAmount.value >= 0 && auditoriumsAmount.value >= 0) {
                 if (hoursAmount.value) {
                     fetch(BACKEND_URL + `/users/${user_id}/limit/hours`, {
@@ -153,13 +165,16 @@
                 }
                 showMessage("Данные обновлены.");
             }
+            hideLoading();
         })
 
         document.addEventListener("DOMContentLoaded", async () => {
+            showLoading();
+
             const me = (await fetchJSON(`${BACKEND_URL}/my/profile`)).user;
             const user = (await fetchJSON(`${BACKEND_URL}/users/${user_id}`)).user;
 
-            loadUserData(user);
+            assignUserData(user);
 
             deleteButton.hidden = me.id === user_id;
             saveEditButton.hidden = me.id !== user_id;
@@ -187,6 +202,7 @@
                     document.getElementById("role_approvance_requests").hidden = !wannabeResponse.ok;
                 }
             }
+            hideLoading();
         });
 
 
@@ -199,10 +215,12 @@
         });
 
         deleteButton.addEventListener("click", async () => {
+            showLoading();
             const response = await fetch(`${BACKEND_URL}/users/${user_id}/delete`, {
                 method: "DELETE",
                 credentials: "include",
             });
+            hideLoading();
             if (response.ok) {
                 window.location.replace("/users");
             } else {
@@ -211,10 +229,10 @@
         });
 
 
-        function loadUserData(user) {
-            firstName.value = user.first_name;
+        function assignUserData(user) {
+            first_name.value = user.first_name;
             patronymic.value = user.patronymic;
-            lastName.value = user.last_name;
+            last_name.value = user.last_name;
             email.textContent = user.email;
             role.value = user.role;
             document.getElementById("hours-amount").value = user.hours_limit;
@@ -222,26 +240,33 @@
         }
 
         async function saveEditedUser() {
-            const newUser = {
-                first_name: firstName.value,
-                patronymic: patronymic.value,
-                last_name: lastName.value,
-                role: role.value
-            };
+            if (validate(first_name, name_regex) && validate(patronymic, name_regex) && validate(last_name, name_regex)) {
+                showLoading();
+                const user = (await fetchJSON(`${BACKEND_URL}/users/${user_id}`)).user;
+            
+                const new_user = {
+                    first_name: first_name.value,
+                    patronymic: patronymic.value,
+                    last_name: last_name.value,
+                    role: role.value
+                };
 
-            const response = await fetch(`${BACKEND_URL}/users/${user_id}`, {
-                method: "PATCH",
-                headers: {'Content-Type': 'application/json'},
-                credentials: "include",
-                body: JSON.stringify(newUser)
-            });
-
-            if (response.ok) {
-                const updated_user = (await response.json()).user;
-                loadUserData(updated_user);
-                showMessage("Профиль успешно обновлён");
-            } else {
-                showError("Ошибка при обновлении профиля");
+                const response = await fetch(`${BACKEND_URL}/users/${user_id}`, {
+                    method: "PATCH",
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: "include",
+                    body: JSON.stringify(new_user)
+                });
+                hideLoading();
+                if (response.ok) {
+                    const updated_user = (await response.json()).user;
+                    assignUserData(updated_user);
+                    if (user.role !== new_user.role) showMessage("Создан запрос на смену роли");
+                    else showMessage("Изменения сохранены");
+                    // window.location.reload();
+                } else {
+                    showError("Ошибка при обновлении профиля");
+                }
             }
         }
 
@@ -251,7 +276,8 @@
         }
 
         async function approve_role() {
-            let response = await fetch(BACKEND_URL + "/users/${user_id}/role", {
+            showLoading();
+            let response = await fetch(`${BACKEND_URL}/users/${user_id}/role`, {
                 method: "PATCH",
                 credentials: 'include',
                 headers: {
@@ -261,8 +287,9 @@
                     role: ROLES_CHOICES[wannabeRole.value],
                 })
             });
+            hideLoading();
             if (response.ok) {
-                await loadUserData();
+                await assignUserData();
             } else {
                 showError("Ошибка при подтверждении роли");
             }
@@ -276,6 +303,7 @@
             listElement.innerHTML = "";
 
             try {
+                showLoading();
                 let response = await fetch(`${BACKEND_URL}/users/${user_id}/auditoriums`, {
                     method: "GET",
                     credentials: "include"
@@ -303,15 +331,25 @@
 
                 allowed_auditoriums.forEach(auditorium => {
                     const div = document.createElement("div");
-                    div.textContent = auditorium["number"] + " ";
+                    div.classList.add("horizontal-div");
+                    const aud_number = document.createElement("span");
+                    aud_number.textContent = `№ ${auditorium.number}`;
+                    const aud_people_capacity = document.createElement("span");
+                    aud_people_capacity.textContent = `${auditorium.size} чел.`;
+                    const aud_building = document.createElement("span");
+                    aud_building.textContent = auditorium.building.name;
 
                     const deleteButton = document.createElement("button");
                     deleteButton.textContent = "Удалить";
+                    deleteButton.classList.add("delete-button");
                     deleteButton.addEventListener("click", async () => {
                         await deleteAuditorium(auditorium.id);
                         await loadAuditoriums();
                     });
 
+                    div.appendChild(aud_number);
+                    div.appendChild(aud_people_capacity);
+                    div.appendChild(aud_building);
                     div.appendChild(deleteButton);
                     listElement.appendChild(div);
                 });
@@ -321,28 +359,40 @@
             } catch (error) {
                 showError(error.message);
             }
+            hideLoading();
         }
 
+
         async function deleteAuditorium(auditoriumId) {
-            const response = await fetch(`${BACKEND_URL}/users/${user_id}/auditoriums/${auditoriumId}`, {
+            showLoading();
+            const response = await fetch(`${BACKEND_URL}/users/${user_id}/auditoriums`, {
                 method: "DELETE",
-                credentials: "include"
+                credentials: "include",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    auditorium_id: auditoriumId
+                })
             });
+            hideLoading();
             if (!response.ok) showError("Не удалось удалить аудиторию");
             else showMessage("Аудитория удалена.");
         }
 
+
         async function resetAuditoriums() {
+            showLoading();
             const response = await fetch(`${BACKEND_URL}/users/${user_id}/auditoriums/reset`, {
                 method: "DELETE",
                 credentials: "include"
             });
+            hideLoading();
             if (response.ok) showMessage("Все аудитории сброшены");
             else showError("Ошибка");
         }
 
 
         async function allowAuditorium() {
+            showLoading();
             const response = await fetch(`${BACKEND_URL}/users/${user_id}/auditoriums`, {
                 method: "POST",
                 headers: {'Content-Type': 'application/json'},
@@ -351,6 +401,7 @@
                     auditorium_id: document.getElementById("auditorium-choice").value
                 })
             });
+            hideLoading();
             if (response.ok) showMessage("Аудитория была добавлена в разрешенные.");
             else showError("Ошибка")
         }

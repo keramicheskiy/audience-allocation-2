@@ -118,8 +118,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 BACKEND_URL = env["backend"].get('BACKEND_URL')
 
-TG_BOT_LINK = env["tg-bot"].get("LINK")
-
 ROLES_CHOICES = (
     ('admin', 'Администратор'),
     ('moderator', 'Модератор'),

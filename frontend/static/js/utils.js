@@ -65,18 +65,25 @@ function deleteCookie(name) {
     setCookie(name, "", -1);
 }
 
-function initTelegramWebApp() {
-    if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.ready();
-    }
-}
-
 function isModerator(role) {
     return ["moderator", "admin"].includes(role);
 }
 
 function isAdmin(role) {
     return role === "admin";
+}
+
+
+const loader = document.querySelector("#loading");
+
+function showLoading() {
+    loader.classList.add("display");
+    setTimeout(() => {
+        loader.classList.remove("display");
+    }, 5000);
+}
+function hideLoading() {
+    loader.classList.remove("display");
 }
 
 

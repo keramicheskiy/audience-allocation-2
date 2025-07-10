@@ -1,10 +1,5 @@
 await verifyTokenAndPopulateUser();
 
-
-window.addEventListener("DOMContentLoaded", function () {
-    initTelegramWebApp();
-});
-
 const menuBtn = document.getElementById('menu-button');
 const sidebar = document.getElementById('sidebar');
 menuBtn.addEventListener('click', () => {

@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
-
 import pytz
 import yaml
 from dotenv import load_dotenv
+from enum import Enum
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -17,9 +17,7 @@ with open(config_file, 'r') as file:
 env = config[MODE][BASE_DIR.name]
 db = config["db"][env["storage"]["type"]]
 
-ADMIN_EMAIL = config['admin'].get('EMAIL')
-ADMIN_PASSWORD = config['admin'].get('PASSWORD')
-ADMIN_TG_ID = config['admin'].get('TG_ID')
+USERS_TO_CREATE = config['users']
 
 SECRET_KEY = env["django"].get('SECRET_KEY')
 
@@ -44,6 +42,8 @@ INSTALLED_APPS = [
     'apps.lectures',
     'apps.my',
     'apps.role_approvance_requests',
+    'apps.buildings',
+    'apps.booking_requests',
     'apps.users',
     'apps.initialization',
 
@@ -150,7 +150,7 @@ smtp_port = env["email"].get('PORT')
 #     "http://localhost:8000",
 #     "http://127.0.0.1:8000",
 # ]
-CORS_ALLOW_ALL_ORIGINS = True  # 🔥 для разработки. В проде укажи явно CORS_ALLOWED_ORIGINS
+CORS_ALLOW_ALL_ORIGINS = True  # 🔥 для разработки. В проде укажи явно CORS_ALLOWED_ORIGINS, == тупоголовый
 CORS_ALLOW_CREDENTIALS = True
 
 
@@ -162,8 +162,12 @@ ROLES_CHOICES = (
 
 ROLES = ["teacher", "moderator", "admin"]
 
+class Roles(Enum):
+    TEACHER = "teacher"
+    MODERATOR = "moderator"
+    ADMIN = "admin"
+
 
 def permitted_roles(role):
     return ROLES[ROLES.index(role):]
 
-TELEGRAM_BOT_TOKEN = env["telegram"].get('TOKEN')

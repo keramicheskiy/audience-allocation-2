@@ -1,7 +1,7 @@
 services:
 
   backend:
-    container_name: audience-allocation-backend
+    container_name: backend-audience-allocation
     build: ./backend
     ports:
       - "8080:8080"
@@ -21,7 +21,7 @@ services:
 
 
   frontend:
-    container_name: audience-allocation-frontend
+    container_name: frontend-audience-allocation
     build: ./frontend
     ports:
       - "8000:8000"
@@ -38,23 +38,10 @@ services:
     entrypoint: /entrypoint.sh
     command: >
       bash -c "gunicorn frontend.wsgi:application --bind 0.0.0.0:8000 --timeout 120"
-  
-  
-
-  tg-bot:
-    container_name: audience-allocation-tg-bot
-    build: ./tg-bot
-    environment:
-      - MODE=local
-      - CONFIG_FILE=/config.yaml
-    volumes:
-      - ./config.yaml:/config.yaml
-    depends_on:
-      - backend
 
 
   redis:
-    container_name: audience-allocation-redis
+    container_name: redis-audience-allocation
     image: redis:7-alpine
     networks:
       - nginx_network
@@ -68,7 +55,7 @@ services:
 
 
   celery:
-    container_name: audience-allocation-celery
+    container_name: celery-audience-allocation
     build: ./backend
     networks:
       - nginx_network
@@ -83,40 +70,26 @@ services:
     command: >
       celery -A backend worker --loglevel=info
 
-  postgres:
-    image: postgres
-    container_name: audience-allocation-postgres
-    restart: always
-    networks:
-      - nginx_network
-    environment:
-      POSTGRES_DB: "postgres"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "postgres"
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    expose:
-      - 5432
-    healthcheck:
-      test: [ "CMD", "pg_isready" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-#  tests:
-#    build: ./tests
-#    container_name: audience-allocation-tests
-#    depends_on:
-#      - backend
-#    environment:
-#      - PYTHONUNBUFFERED=1
-#      - CONFIG_FILE=/config.yaml
-#    networks:
-#      - nginx_network
-#    volumes:
-#      - ./tests:/tests
-#      - ./config.yaml:/config.yaml:ro
-#    command: "pytest -q --tb=no --disable-warnings"
+  # postgres:
+  #   image: postgres
+  #   container_name: postgres-audience-allocation
+  #   restart: always
+  #   networks:
+  #     - nginx_network
+  #   environment:
+  #     POSTGRES_DB: "postgres"
+  #     POSTGRES_USER: "postgres"
+  #     POSTGRES_PASSWORD: "postgres"
+  #   volumes:
+  #     - db-data:/var/lib/postgresql/data
+  #   expose:
+  #     - 5432
+  #   healthcheck:
+  #     test: [ "CMD", "pg_isready" ]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
 
 volumes:
@@ -129,41 +102,3 @@ networks:
   nginx_network:
     external: true
 
-
-
-
-
-
-
-# The commented out section below is an example of how to define a PostgreSQL
-# database that your application can use. `depends_on` tells Docker Compose to
-# start the database before your application. The `db-data` volume persists the
-# database data between container restarts. The `db-password` secret is used
-# to set the database password. You must create `db/password.txt` and add
-# a password of your choosing to it before running `docker compose up`.
-#     depends_on:
-#       db:
-#         condition: service_healthy
-#   db:
-#     image: postgres
-#     restart: always
-#     users: postgres
-#     secrets:
-#       - db-password
-#     volumes:
-#       - db-data:/var/lib/postgresql/data
-#     environment:
-#       - POSTGRES_DB=example
-#       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
-#     expose:
-#       - 5432
-#     healthcheck:
-#       test: [ "CMD", "pg_isready" ]
-#       interval: 10s
-#       timeout: 5s
-#       retries: 5
-# volumes:
-#   db-data:
-# secrets:
-#   db-password:
-#     file: db/password.txt

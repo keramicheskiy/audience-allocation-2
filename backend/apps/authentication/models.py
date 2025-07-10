@@ -33,7 +33,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     patronymic = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(unique=True)
-    tg_id = models.CharField(unique=True, default=None, max_length=30, blank=True, null=True)
     role = models.CharField(max_length=50, choices=ROLES_CHOICES, default='none', blank=True)
     is_verified = models.BooleanField(default=False)
 
@@ -76,21 +75,16 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                 not_yet_passed.append(lecture)
         return not_yet_passed
 
-    def get_amount_of_seconds_booked(self):
-        return sum(
-            [(lecture.end - lecture.start).total_seconds() for lecture in self.get_upcoming_lectures()])
+    def __get_amount_of_seconds_booked(self):
+        return sum([(lecture.end - lecture.start).total_seconds() for lecture in self.get_upcoming_lectures()])
+
 
     def validate_booking_limit(self):
-        if len(self.get_upcoming_lectures()) + 1 > self.booking_limit:
-            return Response({"error": "Вы забронировали максимальное количество аудиторий."},
-                            status=status.HTTP_403_FORBIDDEN)
-        return None
+        return not (len(self.get_upcoming_lectures()) + 1 > self.booking_limit)
+    
 
     def validate_time_limit(self, start, end):
-        if ((end - start).total_seconds() + self.get_amount_of_seconds_booked()) / 3600 > self.hours_limit:
-            return Response({"error": "У вас кончились доступные вам часы для бронирования аудиторий."},
-                            status=status.HTTP_403_FORBIDDEN)
-        return None
+        return not(((end - start).total_seconds() + self.__get_amount_of_seconds_booked()) / 3600 > self.hours_limit)
 
 
 class VerifyCode(models.Model):

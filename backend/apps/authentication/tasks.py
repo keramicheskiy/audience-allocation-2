@@ -1,11 +1,8 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
-import requests
 from celery import shared_task
-
-from backend.settings import sender_email, email_password, smtp_server, smtp_port, TELEGRAM_BOT_TOKEN
+from backend.settings import sender_email, email_password, smtp_server, smtp_port
 
 
 @shared_task
@@ -26,19 +23,5 @@ def send_mail(receiver_email, subject, text):
     except Exception as e:
         print(f"Ошибка отправки: {e}")
         return False
-
-@shared_task
-def send_telegram_message(message: str, tg_id: str):
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": tg_id,
-        "text": message,
-        "parse_mode": "HTML"
-    }
-    try:
-        response = requests.post(url, json=payload)
-        return f"Отправлено: {message}"
-    except Exception as e:
-        print("Ошибка при отправке сообщения")
 
 

@@ -15,17 +15,17 @@ from apps.role_approvance_requests.models import RoleForApproving
 
 
 # localhost:8080/auth/register
-# {"first_name": "", "patronymic": "", "last_name": "", "email": "", "password": "", "role": "", "tg_id": ""}
+# {"first_name": "", "patronymic": "", "last_name": "", "email": "", "password": "", "role": ""}
 @api_view(['POST', 'GET'])
 def register(request):
     if request.method == 'GET':
         return Response({"fields": RegistrationSerializer.Meta.fields})
 
     elif request.method == 'POST':
-        print("Получены данные:", request.data)
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            user.set_password(request.data["password"])
             token = Token.objects.create(user=user)
             verify_email(user)
             notify_moderators(user)
@@ -37,7 +37,7 @@ def register(request):
 
 
 # localhost:8080/auth/login
-# {"email": "", "password": "", "tg_id": ""}
+# {"email": "", "password": ""}
 @api_view(["GET", "POST"])
 def login(request):
     if request.method == 'GET':
@@ -45,15 +45,11 @@ def login(request):
     elif request.method == 'POST':
         email = request.data.get('email')
         password = request.data.get('password')
-        tg_id = request.data.get('tg_id', None)
         if not email or not password:
             return Response({'error': 'Email и пароль обязательны'}, status=status.HTTP_400_BAD_REQUEST)
         user = get_object_or_404(CustomUser, email=email)
-        if tg_id:
-            user.tg_id = tg_id
-            user.save()
         if not user.check_password(password):
-            return Response({'error': 'missing users'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key, 'user': CustomUserSerializer(user).data})
 

@@ -81,13 +81,12 @@
     <h1>Ваши лекции</h1>
 
     <div id="lectures-block">
-        <label>Показывать только предстоящие лекции</label>
-        <label class="switch">
-            <input id="lecturesModeCheckbox" type="checkbox">
-            <span class="slider round"></span>
-        </label>
+        <div class="horizontal-div checkbox">
+            <input type="checkbox" id="lecturesModeCheckbox" name="lecturesModeCheckbox">
+            <label for="lecturesModeCheckbox">Только предстоящие лекции</label>
+        </div>
 
-        <hr>
+        <br>
 
         <div class="lecture-list" id="lecture-list">
             Загрузка...

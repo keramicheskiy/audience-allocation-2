@@ -33,7 +33,7 @@ def delete_lecture(request, lecture_id):
         return Response({"lecture": LectureSerializer(lecture).data})
     elif request.method == "DELETE":
         user = utils.get_user_from_request(request.user)
-        if user.lectures.filter(id=lecture_id).exists():
+        if user.lectures.filter(id=lecture_id).exists() or user.role in ["moderator", "admin"]:
             Lecture.objects.get(id=lecture_id).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_404_NOT_FOUND)

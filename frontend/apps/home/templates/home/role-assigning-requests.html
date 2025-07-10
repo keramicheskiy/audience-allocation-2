@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Запросы на получение роли{% endblock %}
+{% block title %}Запросы на смену роли{% endblock %}
 
 {% block meta %}
     <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
@@ -9,15 +9,20 @@
 
 
 {% block content %}
+    <div id="error-popup" class="error-popup" hidden>Ошибка! Что-то пошло не так.</div>
+    <div id="message-popup" class="message-popup" hidden>Уведомление</div>
+    <div id="loading"></div>
 
-    <h1>Запросы на получение роли</h1>
 
+    <h1>Запросы на присвоение роли</h1>
 
     <div id="requestsBlock">
         <div class="request-list" id="requestList">
             Загрузка...
         </div>
     </div>
+
+
 
     <script src="{% static "js/utils.js" %}"></script>
 
@@ -27,7 +32,8 @@
         });
 
         async function fetchRequests() {
-            const response = await fetch(BACKEND_URL + "/requests", {
+            showLoading();
+            const response = await fetch(BACKEND_URL + "/roles/requests", {
                 method: "GET",
                 credentials: "include"
             });
@@ -36,13 +42,14 @@
             container.innerHTML = '';
 
             if (reqs.length === 0) {
+                hideLoading();
                 container.innerHTML = '<p>Запросов пока нет.</p>';
                 return;
             }
 
             reqs.forEach(request => {
                 const item = document.createElement('div');
-                item.className = 'request-item';
+                item.className = 'horizontal-div';
 
                 const name = document.createElement('span');
                 name.textContent = `${request.user.first_name} ${request.user.patronymic} ${request.user.last_name}`;
@@ -57,6 +64,7 @@
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Удалить';
+                deleteBtn.classList.add("delete-button");
                 deleteBtn.onclick = () => deleteRequest(request);
 
                 item.appendChild(name);
@@ -65,17 +73,19 @@
                 item.appendChild(deleteBtn);
                 container.appendChild(item);
             });
-
+            hideLoading();
         }
 
         async function approveRequest(request) {
-            let response = await fetch(`${BACKEND_URL}/requests/${request.id}`, {
+            showLoading();
+            let response = await fetch(`${BACKEND_URL}/roles/requests/${request.id}`, {
                 method: 'PATCH',
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
             });
+            hideLoading();
             if (response.ok) {
                 showMessage("Заявка одобрена");
                 await fetchRequests();
@@ -85,9 +95,12 @@
         }
 
         async function deleteRequest(request) {
-            let response = await fetch(`${BACKEND_URL}/requests/${request.id}`, {
-                method: 'DELETE', credentials: 'include'
+            showLoading();
+            let response = await fetch(`${BACKEND_URL}/roles/requests/${request.id}`, {
+                method: 'DELETE',
+                credentials: 'include'
             });
+            hideLoading();
             if (response.ok) {
                 showMessage("Заявка отклонена");
                 await fetchRequests();

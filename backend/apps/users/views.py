@@ -124,7 +124,12 @@ def manage_user(request, user_id):
         if serializer.is_valid():
             serializer.save()
             if role_to_assign:
-                RoleForApproving.objects.get_or_create(user=curr_user, wannabe_role=role_to_assign)
+                if RoleForApproving.objects.filter(user=curr_user).exists():
+                    req = RoleForApproving.objects.get(user=curr_user)
+                    req.wannabe_role = role_to_assign
+                    req.save()
+                else:
+                    RoleForApproving.objects.create(user=curr_user, wannabe_role=role_to_assign)
             return Response({"user": serializer.data}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

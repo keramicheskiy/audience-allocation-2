@@ -22,10 +22,12 @@
     </div>
 </header>
 
+<div id="loading"></div>
+
 <aside id="sidebar" class="sidebar hidden">
     <nav>
         <ul id="base-menu">
-            <li><a href="/home">Главная</a></li>
+            <li><a href="/">Главная</a></li>
             <li><a href="/profile">Профиль</a></li>
             <li><a href="/booking">Забронировать</a></li>
         </ul>
@@ -35,8 +37,10 @@
             <li><a href="/lectures" class="menu moderator">Все лекции</a></li>
             <li><a href="/auditoriums" class="menu moderator">Все аудитории</a></li>
             <li><a href="/equipments" class="menu moderator">Оборудование</a></li>
+            <li><a href="/buildings" class="menu moderator">Корпуса</a></li>
             <li><a href="/users" class="menu moderator">Пользователи</a></li>
-            <li><a href="/requests" class="menu admin">Заявки</a></li>
+            <li><a href="/roles/requests" class="menu admin">Заявки на смену роли</a></li>
+            <li><a href="/booking/requests" class="menu moderator">Заявки на бронирование</a></li>
         </ul>
     </nav>
 </aside>
@@ -92,7 +96,7 @@
     }
 
     function updateUI(user) {
-        document.getElementById('user-role').textContent = user.role;
+        document.getElementById('user-role').textContent = ROLES_CHOICES[user.role];
         document.getElementById('user-role-box').style.color = ROLES_COLORS[user.role];
         document.getElementById('username').textContent =
             `${user.last_name} ${user.first_name} ${user.patronymic}`;

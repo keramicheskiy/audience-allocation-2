@@ -16,15 +16,15 @@ from apps.lectures.serializers import LectureSerializer
 def get_own_lectures(request):
     user = utils.get_user_from_request(request)
     lectures = Lecture.objects.filter(user=user).order_by('start').all()
-    return Response({"lectures": LectureSerializer(lectures, many=True).data}, status=status.HTTP_200_OK)
+    return Response({"lectures": LectureSerializer(lectures, many=True).data})
 
 
 # localhost:8080/my/lectures/upcoming
 @api_view(['GET'])
 @role_required('teacher')
 def get_my_upcoming_lectures(request):
-    user = utils.get_user_from_request(request.user)
-    upcoming_lectures = get_upcoming_lectures().filter(user=user)
+    user = utils.get_user_from_request(request)
+    upcoming_lectures = [lecture for lecture in get_upcoming_lectures() if lecture.user == user]
     return Response({'lectures': LectureSerializer(upcoming_lectures, many=True).data})
 
 

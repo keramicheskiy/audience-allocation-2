@@ -103,3 +103,81 @@ h2 {
     z-index: 1000;
     font-family: Arial, sans-serif;
 }
+
+
+.message-popup {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #88df37;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+}
+
+
+
+
+/* #loading {
+    width: 2rem;
+    height: 2rem;
+    border: 5px solid #f3f3f3;
+    border-top: 6px solid #9c41f2;
+    border-radius: 100%;
+    margin: auto;
+    visibility: hidden;
+    animation: spin 1s infinite linear;
+}
+#loading.display {
+    visibility: visible;
+}
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+} */
+
+.form-group input,
+.form-group select,
+.btn {
+    width: calc(100% - 24px); /* Учитываем padding */
+    box-sizing: border-box; /* Чтобы padding не увеличивал ширину */
+}
+
+/* Или альтернативный вариант */
+.form-container {
+    /* ... остальные стили ... */
+    width: 400px; /* Фиксированная ширина вместо max-width */
+}
+
+.form-group input,
+.form-group select,
+.btn {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-group input,
+.form-group select,
+.btn {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px; /* Унифицированный padding */
+}
+
+/* Для сохранения текущего дизайна */
+.form-group input,
+.form-group select {
+    padding: 10px 12px; /* Если хотите сохранить оригинальные отступы */
+}
+
+.btn {
+    padding: 12px; /* Кнопка уже имеет такой padding */
+}

@@ -5,10 +5,10 @@
 
 {% block meta %}
     <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
-    <link rel="stylesheet" href="{% static "home/css/block.css" %}">
 {% endblock %}
 
 {% block content %}
+    <div id="loading"></div>
     <div class="equipment-page">
         <div class="container">
             <h1>Пользователи</h1>
@@ -48,48 +48,61 @@
                 return;
             }
 
+            const resp = await fetch(`${BACKEND_URL}/auth/verify-token`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            const current_user = (await resp.json()).user;
+            
+
             users.forEach(user => {
                 const item = document.createElement('div');
                 item.className = 'block-item';
 
-                const left = document.createElement('div');
-                left.className = 'item-left';
-                left.textContent = `${user.first_name} ${user.patronymic} ${user.last_name}`;
-                left.onclick = () => {
+                const full_name = document.createElement('div');
+                full_name.className = 'item-left';
+                full_name.textContent = `${user.first_name} ${user.patronymic} ${user.last_name}`;
+                full_name.onclick = () => {
                     window.location.replace(`users/${user.id}`);
                 };
 
-                const center = document.createElement('div');
-                center.className = 'item-center';
-                center.textContent = ROLES_CHOICES[user.role];
-                center.style.color = ROLES_COLORS[user.role];
+                const role = document.createElement('div');
+                role.className = 'item-center';
+                role.textContent = ROLES_CHOICES[user.role];
+                role.style.color = ROLES_COLORS[user.role];
 
                 const right = document.createElement('div');
-                right.className = 'item-right';
+                right.classList.add("right");
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Удалить';
+                deleteBtn.classList.add("button");
                 deleteBtn.onclick = () => deleteUser(user);
 
-                right.appendChild(deleteBtn);
+                right.appendChild(role);
+                if (current_user.role === "admin") right.appendChild(deleteBtn);
 
-                item.appendChild(left);
-                item.appendChild(center);
+                item.appendChild(full_name);
                 item.appendChild(right);
                 container.appendChild(item);
             });
         }
 
         async function deleteUser(user) {
+            showLoading();
             let response = await fetch(`${BACKEND_URL}/users/${user.id}/delete`, {
                 method: 'DELETE', credentials: 'include'
             });
             if (response.ok) {
                 showMessage("Пользователь удалён.");
                 await fetchUsers();
+
             } else {
                 showError("Ошибка при удалении пользователя.");
             }
+            hideLoading();
         }
+
+        
     </script>
 {% endblock %}

@@ -1,5 +1,0 @@
-pytest
-requests
-pyyaml
-pytest
-pytest-sugar

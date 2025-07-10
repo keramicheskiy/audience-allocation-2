@@ -68,11 +68,6 @@ button:hover {
     display: none;
 }
 
-#lecturesBlock {
-    max-width: 700px;
-    margin-top: 40px;
-}
-
 .lecture-list {
     background: #fff;
     padding: 20px;
@@ -81,10 +76,12 @@ button:hover {
 }
 
 .lecture-item {
-    display: flex;
+    /* display: flex; */
     justify-content: space-between;
     align-items: center;
     padding: 12px;
+    display: inline-block;
+    white-space: nowrap;
     border-bottom: 1px solid #eee;
 }
 
@@ -136,6 +133,7 @@ input:checked + .slider:before {
     transform: translateX(22px);
 }
 
+
 .error-message {
     color: #a94442;
 }
@@ -155,3 +153,170 @@ input:checked + .slider:before {
 }
 
 
+
+.block-item {
+    display: flex;                /* Горизонтальное расположение */
+    align-items: center;          /* Выравнивание по центру по вертикали */
+    background: white;            /* Белый фон */
+    border-radius: 12px;          /* Скругленные углы */
+    padding: 12px 16px;           /* Внутренние отступы */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Тень для красоты */
+    gap: 16px;                    /* Расстояние между элементами */
+    margin-bottom: 10px;
+}
+
+.item {
+    margin-right: auto;           /* Автоматический отступ справа (прижимает кнопку) */
+}
+
+.button {
+    /* margin-left: auto;            /* Прижимает кнопку к правому краю */
+    padding: 8px 16px;
+    background: #c43939;          /* Зеленый цвет (можно изменить) */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.right {
+    display: flex;
+    margin-left: auto;            /* Прижимает кнопку к правому краю */
+    padding: 8px 16px;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    gap: 5px
+}
+
+/* (Опционально) hover-эффект для кнопки */
+.button:hover {
+    background: #883d3d;
+}
+
+
+
+
+#loading {
+    width: 2rem;
+    height: 2rem;
+    border: 5px solid #f3f3f3;
+    border-top: 6px solid #9c41f2;
+    border-radius: 100%;
+    margin: auto;
+    visibility: hidden;
+    animation: spin 1s infinite linear;
+}
+#loading.display {
+    visibility: visible;
+}
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+    .horizontal-div {
+    display: flex;          /* Горизонтальное расположение */
+    align-items: stretch;   /* Растягиваем элементы по высоте */
+    gap: 8px;              /* Отступ между элементами (опционально) */
+    }
+
+    .horizontal-div input {
+    flex: 1;               /* Растягивает input на всё доступное пространство */
+    padding: 10px;         /* Внутренние отступы */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    height: 48px; /* Фиксированная высота */
+    outline: none;         /* Убирает обводку при фокусе (можно настроить свой) */
+    }
+
+    .horizontal-div span {
+    flex: 1;               /* Растягивает input на всё доступное пространство */
+    padding: 10px;         /* Внутренние отступы */
+    /* border: 1px solid #ccc; */
+    border-radius: 4px;
+    font-size: 16px;
+    height: 48px; /* Фиксированная высота */
+    outline: none;         /* Убирает обводку при фокусе (можно настроить свой) */
+    }
+
+    .horizontal-div button {
+    padding: 0 20px;       /* Горизонтальные отступы */
+    background: #4c6baf;   /* Цвет фона */
+    color: white;          /* Цвет текста */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 48px; /* Фиксированная высота */
+    font-size: 16px;
+    margin-top: auto;
+    }
+
+    .horizontal-div button:hover {
+    background: #253681;   /* Цвет при наведении */
+    }
+
+    .horizontal-div button.delete-button {
+    background: #a83f3c;  /* Красный цвет */
+    color: white;
+    }
+
+    .horizontal-div button.delete-button:hover {
+    background: #791b18;  /* Темнее при наведении */
+    }
+
+    .horizontal-div button.delete-button:active {
+    background: #4b0f0d;  /* Еще темнее при нажатии */
+    }
+
+
+
+.message-popup {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #88df37;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+}
+
+
+/* Общий контейнер */
+.card {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Заголовок */
+.card h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    color: #333;
+}
+
+/* Группы форм и информации */
+.form-group label {
+    display: block;
+    margin-top: 15px;
+    font-weight: 600;
+    color: #444;
+}

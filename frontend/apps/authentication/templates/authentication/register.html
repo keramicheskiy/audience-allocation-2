@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <title>Регистрация</title>
     <link rel="stylesheet" href="{% static "authentication/css/auth.css" %}">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+<div id="loading"></div>
 <div class="form-container">
     <div id="error-popup" class="error-popup" hidden>Ошибка! Что-то пошло не так.</div>
     <div id="message-popup" class="message-popup" hidden>Уведомление</div>
@@ -17,27 +17,27 @@
         <div class="form-group">
             <label for="first_name">Имя</label>
             <strong hidden id="first_name_length_error" class="error-message">Поле не может быть пустым.</strong>
-            <strong hidden id="first_name_regex_error" class="error-message">Имя должно состоять только из
+            <strong hidden id="first_name_error" class="error-message">Имя должно состоять только из
                 кирилицы.</strong>
             <input type="text" id="first_name" name="first_name" required>
         </div>
         <div class="form-group">
             <label for="patronymic">Отчество</label>
             <strong hidden id="patronymic_length_error" class="error-message">Поле не может быть пустым.</strong>
-            <strong hidden id="patronymic_regex_error" class="error-message">Отчество должно состоять только из
+            <strong hidden id="patronymic_error" class="error-message">Отчество должно состоять только из
                 кирилицы.</strong>
             <input type="text" id="patronymic" name="patronymic" required>
         </div>
         <div class="form-group">
             <label for="last_name">Фамилия</label>
             <strong hidden id="last_name_length_error" class="error-message">Поле не может быть пустым.</strong>
-            <strong hidden id="last_name_regex_error" class="error-message">Фамилия должна состоять только из
+            <strong hidden id="last_name_error" class="error-message">Фамилия должна состоять только из
                 кирилицы.</strong>
             <input type="text" id="last_name" name="last_name" required>
         </div>
         <div class="form-group">
             <label for="email" class="error-message">Электронная почта</label>
-            <strong hidden id="email_length_regex_error" class="error-message">Поле не может быть пустым.</strong>
+            <strong hidden id="email_length_error" class="error-message">Поле не может быть пустым.</strong>
             <strong hidden id="email_error" class="error-message">Введите корректный почтовый адрес.</strong>
             <input type="email" id="email" name="email" required>
         </div>
@@ -51,12 +51,11 @@
         </div>
         <div class="form-group">
             <label for="password">Пароль</label>
-            <strong hidden id="password_regex_error" class="error-message">
+            <strong hidden id="password_error" class="error-message">
                 Пароль должен иметь минимум 8 символов,
                 хотя бы одну заглавную букву,
                 хотя бы одну строчную букву,
-                хотя бы одну цифру,
-                хотя бы один спецсимвол (!@#$%^&*)
+                хотя бы одну цифру
             </strong>
             <input type="password" id="password" name="password" required>
         </div>
@@ -77,30 +76,18 @@
     let password = document.getElementById('password');
     let registerButton = document.getElementById('register_button');
 
-    let tg_id = null;
-    if (window.Telegram && window.Telegram.WebApp) {
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
-            tg_id = tg.initDataUnsafe.user.id;
-        }
-    }
-
     registerButton.addEventListener('click', async () => {
         if (validate(firstName, name_regex) && validate(patronymic, name_regex) && validate(lastName, name_regex) &&
             validate(email, email_regex) && validate(password, password_regex)) {
-            console.log("validation passed");
+            showLoading();
             let data = {
                 first_name: firstName.value,
                 patronymic: patronymic.value,
                 last_name: lastName.value,
                 email: email.value,
                 role: document.getElementById('role').value,
-                password: password.value,
-                tg_id: tg_id
+                password: password.value
             };
-            
             const response = await fetch(`${BACKEND_URL}/auth/register`, {
                 method: 'POST',
                 headers: {
@@ -109,6 +96,7 @@
                 credentials: "include",
                 body: JSON.stringify(data)
             });
+            hideLoading();
             if (response.ok) {
                 const data = await response.json();
                 setCookie("Token", data.token);

@@ -44,13 +44,23 @@ def equipments(request):
 
 
 @role_required("moderator")
+def buildings(request):
+    return render(request, "home/buildings.html")
+
+
+@role_required("moderator")
 def get_users(request):
     return render(request, "home/users.html")
 
 
 @authenticated()
 def role_approvance_requests(request):
-    return render(request, "home/requests.html")
+    return render(request, "home/role-assigning-requests.html")
+
+
+@authenticated()
+def booking_requests(request):
+    return render(request, "home/booking-requests.html")
 
 
 @authenticated()

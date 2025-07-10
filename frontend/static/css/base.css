@@ -109,3 +109,17 @@ body {
 }
 
 
+
+.message-popup {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #88df37;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+}

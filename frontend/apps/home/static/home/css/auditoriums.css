@@ -1,0 +1,261 @@
+/* Основные стили формы */
+.card {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.card h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Стили для полей ввода */
+label {
+    display: block;
+    margin: 20px 0 8px;
+    font-weight: 500;
+    color: #34495e;
+    font-size: 0.95rem;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+    background-color: #fff;
+}
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 1em;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Стили для кнопки */
+button {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-top: 25px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* Стили для списка аудиторий */
+#requestsBlock {
+    margin-top: 40px;
+}
+
+.request-list {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.auditorium-item {
+    padding: 18px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+}
+
+.auditorium-item:last-child {
+    border-bottom: none;
+}
+
+.auditorium-item span {
+    flex: 1 1 200px;
+    color: #34495e;
+}
+
+.auditorium-item button {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 8px 16px;
+    margin-top: 0;
+    background-color: #e74c3c;
+}
+
+.auditorium-item button:hover {
+    background-color: #c0392b;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .card {
+        padding: 20px;
+        margin: 20px 15px;
+    }
+    
+    .auditorium-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .auditorium-item span,
+    .auditorium-item button {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.auditorium-item {
+    animation: fadeIn 0.3s ease-out;
+    animation-fill-mode: both;
+}
+
+.auditorium-item:nth-child(1) { animation-delay: 0.1s; }
+.auditorium-item:nth-child(2) { animation-delay: 0.2s; }
+.auditorium-item:nth-child(3) { animation-delay: 0.3s; }
+/* и так далее... */
+
+.horizontal-div {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    width: 100%;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+}
+
+.horizontal-div span {
+    flex: 1;
+    min-width: 0; /* Позволяет тексту переноситься */
+    padding: 8px;
+    font-size: 14px;
+    color: #333;
+    word-break: break-word; /* Перенос длинных слов */
+    white-space: normal; /* Разрешаем перенос строк */
+    overflow: visible;
+}
+
+/* Специальные стили для разных полей */
+.horizontal-div span:nth-child(1) { /* Номер */
+    flex: 0 0 100px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.horizontal-div span:nth-child(2) { /* Размер */
+    flex: 0 0 80px;
+    text-align: center;
+}
+
+.horizontal-div span:nth-child(3) { /* Оборудование */
+    flex: 2 1 200px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.horizontal-div span:nth-child(4) { /* Расположение */
+    flex: 1 1 120px;
+    color: #3a5c8c;
+}
+
+.horizontal-div span:nth-child(5) { /* Описание */
+    flex: 3 1 250px;
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+}
+
+.horizontal-div button {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    margin: 0;
+}
+
+.horizontal-div button:hover {
+    background: #c0392b;
+}
+
+@media (max-width: 1200px) {
+    .horizontal-div {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .horizontal-div span {
+        width: 100%;
+        flex: none;
+    }
+    
+    .horizontal-div button {
+        align-self: flex-end;
+    }
+}

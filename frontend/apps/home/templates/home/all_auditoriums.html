@@ -5,81 +5,161 @@
 
 {% block meta %}
     <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
+    <link rel="stylesheet" href="{% static "home/css/block.css" %}">
+    <link rel="stylesheet" href="{% static "home/css/auditoriums.css" %}">
 {% endblock %}
 
 {% block content %}
-    <div>
-        <form id="auditoriumForm">
+
+    <div id="error-popup" class="error-popup" hidden>Ошибка! Что-то пошло не так.</div>
+    <div id="message-popup" class="message-popup" hidden>Уведомление</div>
+    <div id="loading"></div>
+    <div class="aud">
+        <div class="card">
+            <h1>Аудитория</h1>
+            
             <label for="number">Номер аудитории:</label>
             <input type="text" id="number" name="number" required>
 
             <label for="size">Размер аудитории:</label>
-            <input type="number" id="size" name="size" value="1" min="1" required>
+            <input type="number" id="size" name="size" value="30" min="1" required>
 
-            <label for="equipment">Оборудование:</label>
-            <select id="equipment" name="equipment" required>
-                <option value="">Выберите оборудование...</option>
+            <div id="equipmentsBlock">
+                <label for="equipment">Оборудование:</label>
+                <select id="equipment" name="equipment" required>
+                    <option id="default_equipment" value="">Выберите оборудование...</option>
+                </select>
+                <button id="add-equipment-button" class="btn">Добавить</button>
+
+                <div class="equipment-list" id="equipmentList">
+                    Ни одного оборудования не выбрано.
+                </div>
+            </div>
+            
+            <label for="building">Расположение:</label>
+            <select id="building" name="building" required>
+                <option value="">Выберите корпус...</option>
             </select>
-
-            <label for="location">Расположение:</label>
-            <input type="text" id="location" name="location" required>
 
             <label for="description">Описание:</label><br>
             <textarea id="description" name="description" rows="4" cols="50"></textarea>
 
             <button type="button" id="saveButton" onclick="saveAuditorium()">Сохранить</button>
-        </form>
-
-        <h1>Все аудитории</h1>
-        <div id="requestsBlock">
-            <div class="request-list" id="requestList">
-                Загрузка...
-            </div>
         </div>
     </div>
+
+    <h1>Все аудитории</h1>
+    <div id="requestsBlock">
+        <div class="request-list" id="requestList">
+            Загрузка... 
+        </div>
+    </div>
+
 
     <script src="{% static "js/utils.js" %}"></script>
     <script src="{% static "js/validation.js" %}"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchEquipments();
+        document.addEventListener('DOMContentLoaded', async () => {
+            fetchEquipments();  
             fetchAuditoriums();
+            fetchBuildings(); 
         });
+        
 
-
+        let equipment_list = [];
+        
         let number = document.getElementById('number');
         let size = document.getElementById('size');
         let equipment = document.getElementById('equipment');
-        let location = document.getElementById('location');
+        let building = document.getElementById('building');
         let description = document.getElementById('description');
+        let add_equipment_button = document.getElementById("add-equipment-button");
+        let equipment_list_element = document.getElementById("equipmentList");
+        let select = document.getElementById("equipment");  
+        
 
         async function fetchEquipments() {
-            const response = await fetch(BACKEND_URL + '/equipments', {
+            const response = await fetch(`${BACKEND_URL}/equipments`, {
                 method: 'GET',
                 credentials: 'include',
             });
-            const equipments = await response.json();
-            const select = document.getElementById("equipment");
+            const equipments = (await response.json()).equipments;
 
-            equipments.forEach(e => {
+            equipments.forEach(equipment => {
                 const opt = document.createElement("option");
-                opt.value = e.id;
-                opt.text = e.name;
+                opt.value = equipment.id;
+                opt.text = equipment.name;
+                select.appendChild(opt);
+            });
+        }
+
+        add_equipment_button.addEventListener("click", addEquipment);
+
+        function addEquipment() {
+            console.log(equipment_list);
+            
+            if (select.value === "") {
+                showError("Выберите оборудование");
+                return;
+            }
+
+            if (equipment_list.includes(select.value)) {
+                showError("Это оборудование уже добавлено");
+                return;
+            }
+
+            equipment_list.push(select.value);
+
+            const item = document.createElement("div");
+            item.classList.add("horizontal-div");
+
+            const name = document.createElement("p");
+            name.textContent = select.options[select.selectedIndex].text;
+
+            const delBtn = document.createElement("button");
+            delBtn.classList.add("delete-button");
+            delBtn.textContent = "Удалить";
+            delBtn.onclick = () => {
+                equipment_list = equipment_list.filter(id => id !== select.value);
+                item.remove();
+            };
+
+            item.appendChild(name);
+            item.appendChild(delBtn);
+            equipment_list_element.appendChild(item);
+        }
+
+
+
+        async function fetchBuildings() {
+            const response = await fetch(`${BACKEND_URL}/buildings`, {
+                method: 'GET',
+                credentials: 'include',
+            });
+            const buildings = (await response.json()).buildings;
+            const select = document.getElementById("building");
+
+            buildings.forEach(building => {
+                const opt = document.createElement("option");
+                opt.value = building.id;
+                opt.text = building.name;
                 select.appendChild(opt);
             });
         }
 
         async function fetchAuditoriums() {
-            const response = await fetch(BACKEND_URL + "/auditoriums", {
+            showLoading();
+            const response = await fetch(`${BACKEND_URL}/auditoriums`, {
                 method: "GET",
                 credentials: "include"
             });
-            let auditoriums = await response.json();
+            let auditoriums = (await response.json()).auditoriums;
             const container = document.getElementById("requestList");
             container.innerHTML = "";
 
             if (auditoriums.length === 0) {
+                hideLoading();
                 container.innerHTML = '<p>Аудиторий пока нет.</p>';
                 return;
             }
@@ -87,6 +167,7 @@
             auditoriums.forEach((auditorium) => {
                 const item = document.createElement('div');
                 item.className = 'auditorium-item';
+                item.classList.add("horizontal-div");
 
                 const number = document.createElement('span');
                 number.textContent = "Номер: " + auditorium.number;
@@ -94,34 +175,42 @@
                 const size = document.createElement('span');
                 size.textContent = "Размер: " + auditorium.size;
 
-                const equipment = document.createElement('span');
-                equipment.textContent = "Оборудование: " + (auditorium.equipment?.name || '—');
+                const equipment_el = document.createElement('span');
+                let equipments = "";
+                auditorium.equipments.forEach(equipment => {
+                    equipments += `${equipment.name}, `;
+                });
+                equipment_el.textContent = `Оборудование: ${equipments.trim(", ")}`;
 
-                const location = document.createElement('span');
-                location.textContent = "Расположение: " + auditorium.location;
+                const building = document.createElement('span');
+                building.textContent = "Расположение: " + auditorium.building.name;
 
                 const description = document.createElement('span');
                 description.textContent = "Описание: " + auditorium.description;
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Удалить';
+                deleteBtn.classList.add("delete-button");
                 deleteBtn.onclick = () => deleteAuditorium(auditorium);
 
                 item.appendChild(number);
                 item.appendChild(size);
-                item.appendChild(equipment);
-                item.appendChild(location);
+                item.appendChild(equipment_el);
+                item.appendChild(building);
                 item.appendChild(description);
                 item.appendChild(deleteBtn);
                 container.appendChild(item);
             });
+            hideLoading();
         }
 
         async function deleteAuditorium(auditorium) {
+            showLoading();
             let response = await fetch(`${BACKEND_URL}/auditoriums/${auditorium.id}/delete`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
+            hideLoading();
             if (response.ok) {
                 showMessage("Аудитория удалена");
                 await fetchAuditoriums();
@@ -131,29 +220,33 @@
         }
 
         async function saveAuditorium() {
-            const valid = validate(number, /^[A-Za-zА-Яа-я0-9-]+$/);
-            if (valid && size.value > 0 && location.value.trim() !== "") {
-                const response = await fetch(BACKEND_URL + "/auditoriums/new", {
+            if (validate(number, /^[A-Za-zА-Яа-я0-9-]+$/) && size.value > 0 && building.value.trim() !== "" && equipment.value.trim() !== "") {
+                showLoading();
+                let auditorium_json = JSON.stringify({
+                        number: number.value,
+                        size: parseInt(size.value),
+                        equipments: equipment_list.map(id => parseInt(id)),
+                        building: parseInt(building.value),
+                        description: description.value,
+                    });
+                
+                console.log(auditorium_json);
+
+                const response = await fetch(`${BACKEND_URL}/auditoriums/new`, {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        number: number.value,
-                        size: parseInt(size.value),
-                        equipment: parseInt(equipment.value),
-                        location: location.value,
-                        description: description.value,
-                    })
+                    body: auditorium_json
                 });
-
+                hideLoading();
                 if (response.ok) {
                     showMessage("Аудитория успешно создана");
                     number.value = "";
                     size.value = 1;
                     equipment.value = "";
-                    location.value = "";
+                    building.value = "";
                     description.value = "";
                     await fetchAuditoriums();
                 } else {

@@ -10,7 +10,10 @@ urlpatterns = [
     path('booking', views.available_auditoriums),
     path('auditoriums', views.all_auditoriums),
     path('equipments', views.equipments),
+    path('buildings', views.buildings),
     path('users', views.get_users),
     path('users/<user_id>', views.get_user),
-    path('requests', views.role_approvance_requests),
+    path('roles/requests', views.role_approvance_requests),
+    path('booking/requests', views.booking_requests),
+
 ]

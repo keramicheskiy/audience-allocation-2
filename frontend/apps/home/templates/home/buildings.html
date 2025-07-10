@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Оборудование{% endblock %}
+{% block title %}Корпуса{% endblock %}
 
 {% block meta %}
     <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
@@ -16,21 +16,21 @@
     <div id="message-popup" class="message-popup" hidden>Уведомление</div>
     <div id="loading"></div>
 
-    <div class="equipment-page">
+    <div class="building-page">
         <div class="card">
-            <h1>Оборудование</h1>
+            <h1>Корпуса</h1>
 
             <div class="form-group">
-                <label for="name">Название оборудования</label>
-                <strong id="name_error" class="error-message" hidden>Название должно быть уникальным и минимум 3 символа.</strong>
+                <label for="name">Название корпуса</label>
+                <strong id="name_error" class="error-message" hidden>Название должно быть уникальным и минимум 2 символа.</strong>
                 <div class="horizontal-div">
                     <input type="text" id="name" name="name" class="input-field" placeholder="Введите название" autocomplete="off" minlength="3"/>
 
-                    <button id="btnCreateEquipment" class="btn" onclick="createEquipment()">Добавить</button>
+                    <button id="btnCreateBuilding" class="btn" onclick="createBuilding()">Добавить</button>
                 </div>
             </div>
 
-            <div id="equipmentList" class="itemls">
+            <div id="buildingList" class="itemls">
                 <p>Загрузка...</p>
             </div>
 
@@ -46,36 +46,36 @@
 
     <script>
 
-        document.addEventListener('DOMContentLoaded', fetchEquipments);
+        document.addEventListener('DOMContentLoaded', fetchBuildings);
 
-        async function fetchEquipments() {
+        async function fetchBuildings() {
             showLoading();
-            let response = await fetch(BACKEND_URL + '/equipments', {
+            let response = await fetch(BACKEND_URL + '/buildings', {
                 method: 'GET',
                 credentials: 'include'
             });
             if (response.ok) {
-                const equipments = (await response.json()).equipments;
-                const container = document.getElementById('equipmentList');
+                const buildings = (await response.json()).buildings;
+                const container = document.getElementById('buildingList');
                 container.innerHTML = '';
 
-                if (equipments.length === 0) {
-                    container.innerHTML = '<p>Оборудования пока нет.</p>';
+                if (buildings.length === 0) {
+                    container.innerHTML = '<p>Корпусов пока нет.</p>';
                     return;
                 }
 
-                equipments.forEach(equipment => {
+                buildings.forEach(building => {
                     const item = document.createElement('div');
                     item.className = 'horizontal-div';
 
                     const name = document.createElement('span');
-                    name.textContent = equipment.name;
+                    name.textContent = building.name;
 
                     const delBtn = document.createElement('button');
                     delBtn.id = "deleteButton"
                     delBtn.textContent = 'Удалить';
                     delBtn.classList.add('delete-button');
-                    delBtn.onclick = () => deleteEquipment(equipment);
+                    delBtn.onclick = () => deleteBuilding(buildings);
 
                     item.appendChild(name);
                     item.appendChild(delBtn);
@@ -86,28 +86,28 @@
             hideLoading();
         }
 
-        async function deleteEquipment(equipment) {
+        async function deleteBuilding(buildings) {
             showLoading();
-            let response = await fetch(BACKEND_URL + `/equipments/${equipment.id}`, {
+            let response = await fetch(BACKEND_URL + `/buildings/${building.id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
             hideLoading();
             if (response.ok) {
-                showMessage("Оборудование успешно удалено");
-                await fetchEquipments();
+                showMessage("Корпус успешно удален");
+                await fetchBuildings();
             } else {
                 showError("Ошибка");
             }
         }
 
 
-        async function createEquipment() {
+        async function createBuilding() {
             let name = document.getElementById("name");
             if (validate(name, /^.{3,}$/))
             showLoading();
             document.getElementById("name_error").hidden = name.value !== "";
-            let response = await fetch(BACKEND_URL + '/equipments/new', {
+            let response = await fetch(BACKEND_URL + '/buildings/new', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -119,8 +119,8 @@
             });
             hideLoading();
             if (response.ok) {
-                showMessage("Оборудование добавлено");
-                await fetchEquipments();
+                showMessage("Корпус добавлен");
+                await fetchBuildings();
             } else {
                 if ((await response.json())["message"] !== undefined) {
                     document.getElementById('message_error').hidden = false;

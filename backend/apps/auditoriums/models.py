@@ -3,14 +3,15 @@ from datetime import datetime
 from django.db import models
 
 from apps.equipments.models import Equipment
+from apps.buildings.models import Building
 
 
 class Auditorium(models.Model):
     number = models.CharField(max_length=10)
-    size = models.IntegerField(null=False, default=0)
-    equipment = models.ForeignKey(Equipment, null=True, on_delete=models.SET_NULL)
-    location = models.CharField(max_length=100, null=False, unique=False, default='')
-    description = models.TextField(default="")
+    size = models.IntegerField(null=False, default=1)
+    equipments = models.ManyToManyField(Equipment, related_name="auditoriums")
+    building = models.ForeignKey(Building, on_delete=models.SET_NULL, related_name="auditoriums", null=True, blank=True)
+    description = models.TextField(default="", blank=True, null=True)
 
     def is_available(self, start: datetime, end: datetime):
         for lecture in self.lectures:
@@ -22,8 +23,8 @@ class Auditorium(models.Model):
         return (f"Auditorium("
                 f"id: {self.id}, "
                 f"number: {self.number}, "
-                f"size: {self.size}, "
+                f"size: {self.size} people, "
                 f"equipment: {self.equipment.name}, "
-                f"location: {self.location}, "
+                f"building: {self.building}, "
                 f"description: {self.description}"
                 f")")

@@ -1,0 +1,219 @@
+/* booking.css - оптимизированная версия */
+
+/* Основные стили */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+#calendar {
+    width: 100%;
+    height: 300px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+#filter {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    margin-bottom: 20px;
+    width: 800px;
+    margin: auto;
+}
+
+h2 {
+    color: #2c3e50;
+    margin-top: 25px;
+    margin-bottom: 12px;
+    font-size: 1.2em;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* Стили для корпусов (buildings) */
+#building-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.building {
+    padding: 12px 24px;
+    border-radius: 25px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    line-height: 1;
+}
+
+.building:hover {
+    background-color: #e0e0e0;
+}
+
+.building.selected-buildings {
+    background-color: #3498db;
+    color: white;
+}
+
+/* Горизонтальные блоки */
+.horizontal-div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.horizontal-div-element {
+    padding: 10px 15px;
+    border-radius: 5px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    margin: 0;
+}
+
+/* Поля ввода */
+input[type="text"] {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    font-size: 1em;
+    transition: border 0.3s;
+    width: 150px;
+    display: inline-block;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Кнопки */
+button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 600;
+    margin: 10px 0 20px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+#search-auditoriums-button {
+    background-color: #3498db;
+    color: white;
+}
+
+#search-auditoriums-button:hover {
+    background-color: #2980b9;
+}
+
+#book-button {
+    background-color: #2e6dcc;
+    color: white;
+    display: block;
+    width: 100%;
+}
+
+#book-button:hover {
+    background-color: #275dae;
+}
+
+/* Список аудиторий */
+#auditorium-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.auditorium-item {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #3498db;
+    transition: transform 0.3s;
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.auditorium-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.auditorium-name {
+    font-weight: 600;
+    font-size: 1.1em;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.auditorium-details {
+    color: #7f8c8d;
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+.auditorium-capacity {
+    color: #3498db;
+    font-weight: 600;
+}
+
+/* Сообщения об ошибках */
+#start-error, #end-error, #date-error {
+    color: #e74c3c;
+    font-size: 0.8em;
+    margin-top: 5px;
+    display: none;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .horizontal-div {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .horizontal-div-element, input[type="text"] {
+        width: 100%;
+    }
+    
+    #auditorium-list {
+        grid-template-columns: 1fr;
+    }
+}

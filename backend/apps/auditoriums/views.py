@@ -8,7 +8,7 @@ from apps.auditoriums.serializers import AuditoriumSerializer, AuditoriumPostSer
 from apps.authentication import utils, tasks
 from apps.authentication.decorators import role_required
 from apps.lectures.models import Lecture
-from apps.lectures.services import get_lecture_intervals
+from apps.lectures.services import get_lecture_intervals, validate_time, validate_date
 
 
 # localhost:8080/auditoriums/new
@@ -68,14 +68,6 @@ def get_auditorium(request, auditorium_id):
     return Response({"auditorium": serializer.data}, status=status.HTTP_200_OK)
 
 
-# # localhost:8080/auditoriums
-# @api_view(["GET"])
-# @role_required("teacher")
-# def get_auditoriums(request):
-#     serializer = AuditoriumSerializer(Auditorium.objects.all(), many=True)
-#     return Response({"auditoriums": serializer.data})
-
-
 # localhost:8080/auditoriums?date=2025-12-31&start=10:45&end=12:15
 @api_view(['GET'])
 @role_required("teacher")
@@ -83,6 +75,12 @@ def get_auditoriums(request):
     if not request.GET.get('date', None) or not request.GET.get('start', None) or not request.GET.get('end', None):
         auditoriums = Auditorium.objects.all()
         return Response({"auditoriums": AuditoriumSerializer(auditoriums, many=True).data})
+    
+    if not validate_date(request.GET.get('date')):
+        return Response({"error": "Дата должна быть в формате 2000-12-31."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not validate_time(request.GET.get('start')) or not validate_time(request.GET.get('end')):
+        return Response({"error": "Время должно быть в формате 23:59."}, status=status.HTTP_400_BAD_REQUEST)
 
     start, end = get_lecture_intervals(request.GET.get('date'), request.GET.get('start'), request.GET.get('end'))
     user = utils.get_user_from_request(request)

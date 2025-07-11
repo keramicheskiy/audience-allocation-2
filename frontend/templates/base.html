@@ -76,7 +76,6 @@
         if (!getCookie("Token")) {
             window.location.replace('/auth/login');
         }
-        console.log(getCookie("Token"));
 
 
         const response = await fetch(`${BACKEND_URL}/auth/verify-token`, {
@@ -86,7 +85,6 @@
         if (response.ok) {
             const resp = await response.json();
             const user = resp.user;
-            console.log(user);
 
             updateUI(user);
             hideUnavailableElements(user.role);

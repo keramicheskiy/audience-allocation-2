@@ -20,3 +20,24 @@ function validate(field, regex = /.*/, length_error = "_length_error", regex_err
     return regex.test(field.value) && field.value.length !== 0;
 }
 
+function validate_time(strTime) {
+    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return timeRegex.test(strTime);
+}
+
+function validate_date(strDate, format = 'DD-MM-YYYY') {
+    try {
+        let date;
+        
+        if (format === 'DD-MM-YYYY') {
+            const parts = strDate.split('-');
+            if (parts.length !== 3) return false;
+            date = new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+        
+        return !isNaN(date.getTime()) && 
+               date.toISOString().slice(0,10) === strDate;
+    } catch (e) {
+        return false;
+    }
+}

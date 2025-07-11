@@ -67,7 +67,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def get_upcoming_lectures(self):
         now = datetime.now(tz=time_zone)
-        lectures = Lecture.objects.filter(email=self.email).order_by('date', 'start')
+        lectures = Lecture.objects.filter(user=self).order_by('start')
         not_yet_passed = []
         for lecture in lectures:
             lecture_end = lecture.end

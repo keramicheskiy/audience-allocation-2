@@ -17,7 +17,7 @@ def get_upcoming_lectures():
 
 
 class Lecture(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="lectures")
     auditorium = models.ForeignKey(Auditorium, on_delete=models.CASCADE, related_name='lectures', related_query_name='lecture')
     start = models.DateTimeField()
     end = models.DateTimeField()

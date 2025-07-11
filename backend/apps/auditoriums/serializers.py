@@ -8,14 +8,11 @@ from apps.buildings.models import Building
 
 
 class AuditoriumPostSerializer(serializers.ModelSerializer):
-    equipments = serializers.PrimaryKeyRelatedField(  # Заменяем EquipmentSerializer на PrimaryKeyRelatedField
-        queryset=Equipment.objects.all(),  # Указываем queryset для валидации
-        many=True  # Так как это ManyToManyField
+    equipments = serializers.PrimaryKeyRelatedField(
+        queryset=Equipment.objects.all(),
+        many=True  # Так как это ManyToManyField, если забыл, иди загугли, я тебе не буду опять объяснять, маленький толстый мальчик
     )
-    building = serializers.PrimaryKeyRelatedField(  # Заменяем BuildingSerializer на PrimaryKeyRelatedField
-        queryset=Building.objects.all(),  # Указываем queryset для валидации
-        allow_null=True  # Разрешаем null, так как в модели `null=True`
-    )
+    building = serializers.PrimaryKeyRelatedField(queryset=Building.objects.all(), allow_null=True)
 
     class Meta:
         model = Auditorium

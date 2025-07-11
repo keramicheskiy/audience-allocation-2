@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Ваши лекции{% endblock %}
+{% block title %}Все лекции{% endblock %}
 
 {% block meta %}
     <link rel="stylesheet" href="{% static "home/css/listlike.css" %}">
@@ -113,7 +113,7 @@
                 showMessage("Лекция успешно удалена");
                 await fetchLectures();
             } else {
-                showError(response.e);
+                showError((await response.json()).error);
             }
         }
 

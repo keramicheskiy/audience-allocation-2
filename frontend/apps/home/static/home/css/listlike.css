@@ -320,3 +320,37 @@ input:checked + .slider:before {
     font-weight: 600;
     color: #444;
 }
+
+
+
+/* .block {
+    background-color: white;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    display: block;
+} */
+
+.block {
+    background-color: white;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-wrap: nowrap; /* Запрет переноса строк */
+    overflow-x: auto;  /* Горизонтальный скролл при переполнении */
+    gap: 12px;         /* Отступ между элементами */
+    align-items: center; /* Выравнивание по вертикали */
+    width: 100%;       /* На всю доступную ширину */
+}
+
+/* Стиль для внутренних элементов (пример) */
+.block-item {
+    flex: 0 0 auto;    /* Не сжимать и не растягивать */
+    white-space: nowrap; /* Запрет переноса текста */
+    padding: 8px 12px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}

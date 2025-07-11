@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .models import BookingRequest
-from .serializers import BookingRequestSerializer
+from .serializers import BookingRequestSerializer, BookingRequestPostSerializer
 from apps.authentication.decorators import role_required
 
 from datetime import datetime
@@ -20,7 +20,7 @@ from backend.settings import time_zone
 def get_booking_requests(request):
     reqs = BookingRequest.objects.all()
     for req in reqs:
-        if req.end < datetime.now():
+        if req.end < datetime.now(tz=time_zone):
             reqs.remove(req)
             notify_request_expired(req)
             req.delete()
@@ -35,7 +35,7 @@ def get_booking_requests(request):
 def add_booking_request(request):
     request.data["user"] = utils.get_user_from_request(request).id
 
-    serializer = BookingRequestSerializer(data=request.data)
+    serializer = BookingRequestPostSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -45,7 +45,7 @@ def add_booking_request(request):
     end_time = serializer.validated_data.get('end')
 
     if end_time < datetime.now(tz=time_zone):
-        return Response({"errors": "Нельзя забронировать аудиторию на прошедшую дату."}, status.HTTP_403_FORBIDDEN)
+        return Response({"error": "Нельзя забронировать аудиторию на прошедшую дату."}, status.HTTP_403_FORBIDDEN)
 
     if Lecture.objects.filter(auditorium=auditorium, end__gt=start_time, start__lt=end_time).exists():
         return Response({"error": "Аудитория уже занята на это время."}, status=status.HTTP_409_CONFLICT)
@@ -54,10 +54,10 @@ def add_booking_request(request):
         return Response({"error": "Данная аудитория недоступна для вашего аккаунта."}, status=status.HTTP_403_FORBIDDEN)
     
     if not(user.validate_booking_limit()):  # Checking if a user has ability to book one more lecture
-        return Response({"errors": "У вас уже забронировано максимальное количество лекций."}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"error": "У вас уже забронировано максимальное количество лекций."}, status=status.HTTP_403_FORBIDDEN)
     
     if not(user.validate_time_limit(start_time, end_time)):  # Checking if a user can book this much hours
-        return Response({"errors": "Количество часов, запрошенное вами на бронь, превышает лимит."}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"error": "Количество часов, запрошенное вами на бронь, превышает лимит."}, status=status.HTTP_403_FORBIDDEN)
     
     serializer.save()
     return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -74,7 +74,7 @@ def manage_booking_request(request, request_id):
         if req.end < datetime.now(tz=time_zone):
             req.delete()
             notify_request_expired(req)
-            return Response({"errors": "Нельзя забронировать аудиторию на прошедшую дату."}, status.HTTP_403_FORBIDDEN)
+            return Response({"error": "Нельзя забронировать аудиторию на прошедшую дату."}, status.HTTP_403_FORBIDDEN)
 
         if Lecture.objects.filter(auditorium=req.auditorium, end__gt=req.start, start__lt=req.end).exists():
             return Response({"error": "Аудитория уже занята на это время."}, status=status.HTTP_409_CONFLICT)
@@ -83,10 +83,10 @@ def manage_booking_request(request, request_id):
             return Response({"error": "Данная аудитория более не доступна для этого пользователя."}, status=status.HTTP_403_FORBIDDEN)
     
         if not(req.user.validate_booking_limit()):
-            return Response({"errors": "У пользователя уже забронировано максимальное количество лекций."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": "У пользователя уже забронировано максимальное количество лекций."}, status=status.HTTP_403_FORBIDDEN)
         
         if not(req.user.validate_time_limit(req.start, req.end)):
-            return Response({"errors": "Количество часов превышает лимит."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": "Количество часов превышает лимит."}, status=status.HTTP_403_FORBIDDEN)
 
         Lecture.objects.create(user=req.user, auditorium=req.auditorium, start=req.start, end=req.end).save()
         req.delete()

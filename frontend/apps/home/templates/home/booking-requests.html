@@ -43,32 +43,72 @@
             container.innerHTML = '';
 
             if (reqs.length === 0) {
+                hideLoading();
                 container.innerHTML = '<p>Запросов пока нет.</p>';
                 return;
             }
 
             reqs.forEach(request => {
                 const item = document.createElement('div');
-                item.className = 'horizontal-div';
+                item.classList.add("horizontal-div");
+                item.classList.add("block");
 
                 const name = document.createElement('span');
+                name.classList.add("block-item");
                 name.textContent = `${request.user.first_name} ${request.user.patronymic} ${request.user.last_name}`;
+                name.onclick = () => {window.location.replace(`/users/${request.user.id}`)};
 
-                const role = document.createElement('span');
-                role.textContent = ROLES_CHOICES[request.wannabe_role];
-                role.style.color = ROLES_COLORS[request.wannabe_role];
+                const aud_number = document.createElement('span');
+                aud_number.classList.add("block-item");
+                aud_number.textContent = request.auditorium.number;
+                // aud_number.onclick = () => {открыть страницу аудитории};
+
+                const aud_building = document.createElement('span');
+                aud_building.classList.add("block-item");
+                aud_building.textContent = `${request.auditorium.building.name}`;
+
+                const aud_capacity = document.createElement('span');
+                aud_capacity.classList.add("block-item");
+                aud_capacity.textContent = `${request.auditorium.size} чел.`;
+
+                const start = document.createElement('span');
+                start.classList.add("block-item");
+                const end = document.createElement('span');
+                end.classList.add("block-item");
+                
+                const start_date = new Date(request.start);
+                const end_date = new Date(request.end);
+                const now = new Date();
+
+                const padZero = num => num.toString().padStart(2, '0');
+
+                const str_date1 = `${padZero(start_date.getDate())}.${padZero(start_date.getMonth() + 1)}.${start_date.getFullYear()}`;
+                const str_date2 = `${padZero(end_date.getDate())}.${padZero(end_date.getMonth() + 1)}.${end_date.getFullYear()}`;
+                const str_start = `${padZero(start_date.getHours())}:${padZero(start_date.getMinutes())}`;
+                const str_end = `${padZero(end_date.getHours())}:${padZero(end_date.getMinutes())}`;
+
+                start.textContent = `Начало: ${str_start} ${str_date1}`;
+                end.textContent = `Конец: ${str_end} ${str_date2}`;
+
 
                 const approveBtn = document.createElement('button');
+                approveBtn.classList.add("block-item");
                 approveBtn.textContent = 'Подтвердить';
+                approveBtn.classList.add("button");
                 approveBtn.onclick = () => approveRequest(request);
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Удалить';
                 deleteBtn.classList.add("delete-button");
+                deleteBtn.classList.add("block-item");
                 deleteBtn.onclick = () => deleteRequest(request);
 
                 item.appendChild(name);
-                item.appendChild(role);
+                item.appendChild(aud_number);
+                item.appendChild(aud_building);
+                item.appendChild(aud_capacity);
+                item.appendChild(start);
+                item.appendChild(end);
                 item.appendChild(approveBtn);
                 item.appendChild(deleteBtn);
                 container.appendChild(item);
@@ -78,8 +118,8 @@
 
         async function approveRequest(request) {
             showLoading();
-            let response = await fetch(`${BACKEND_URL}/requests/${request.id}`, {
-                method: 'PATCH',
+            let response = await fetch(`${BACKEND_URL}/booking/requests/${request.id}`, {
+                method: 'POST',
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
@@ -90,13 +130,13 @@
                 showMessage("Заявка одобрена");
                 await fetchRequests();
             } else {
-                showError("Ошибка");
+                showError((await response.json()).error);
             }
         }
 
         async function deleteRequest(request) {
             showLoading();
-            let response = await fetch(`${BACKEND_URL}/requests/${request.id}`, {
+            let response = await fetch(`${BACKEND_URL}/booking/requests/${request.id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -105,7 +145,7 @@
                 showMessage("Заявка отклонена");
                 await fetchRequests();
             } else {
-                showError("Ошибка");
+                showError((await response.json()).error);
             }
         }
 
